@@ -1,0 +1,13 @@
+^LICENSE\.md$
+^Makefile$
+^.*\.Rproj$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^.lintr$
+^README\.Rmd$
+^data-raw$
+vignettes/figure
+notes.R
+^CODE_OF_CONDUCT\.md$

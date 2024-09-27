@@ -1,0 +1,20 @@
+Package: rls
+Title: Row Level Security
+Version: 0.0.1.91
+Authors@R: c(
+    person("Scott", "Chamberlain", role = c("aut", "cre"),
+        email = "sachamber@fredhutch.org",
+        comment = c(ORCID = "0000-0003-1444-9135"))
+  )
+Description: Row level security helpers.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports: 
+    DBI,
+    glue,
+    tibble
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
