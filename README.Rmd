@@ -4,6 +4,7 @@
 
 <!-- badges: start -->
 [![Project Status: Concept – Not useable, no support, not open to feedback, unstable API.](https://getwilds.org/badges/badges/concept.svg)](https://getwilds.org/badges/#concept)
+[![R-check](https://github.com/getwilds/rls/actions/workflows/R-check.yml/badge.svg)](https://github.com/getwilds/rls/actions/workflows/R-check.yml)
 <!-- badges: end -->
 
 Row Level Security stuff
