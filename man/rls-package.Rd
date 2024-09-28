@@ -6,7 +6,16 @@
 \alias{rls-package}
 \title{rls: Row Level Security}
 \description{
-Row level security helpers.
+Row level security helpers. Currenlty supports PostgreSQL and Redshift flavored PostgreSQL.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/getwilds/rls}
+  \item \url{http://getwilds.org/rls}
+  \item Report bugs at \url{https://github.com/getwilds/rls/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Scott Chamberlain \email{sachamber@fredhutch.org} (\href{https://orcid.org/0000-0003-1444-9135}{ORCID})

@@ -2,21 +2,34 @@
 % Please edit documentation in R/list.R
 \name{rls_policies}
 \alias{rls_policies}
-\title{List RLS policies}
+\title{List row level security policies}
 \usage{
 rls_policies(con)
 }
 \arguments{
-\item{con}{a DBI database connection object}
+\item{con}{a DBI database connection object. required. supports only
+postgres and redshift connections}
 }
 \value{
 tibble with RLS policies
 }
 \description{
-List RLS policies
+List row level security policies
+}
+\details{
+Only difference between postgres and redshift is they use
+different table names for RLS policies:
+\itemize{
+\item Postgres: pg_policies
+\item Redshift: svv_rls_policy
+}
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
+library(RPostgres)
+con <- dbConnect(Postgres())
 rls_policies(con)
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

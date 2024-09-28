@@ -11,3 +11,4 @@
 vignettes/figure
 notes.R
 ^CODE_OF_CONDUCT\.md$
+endtoend-*

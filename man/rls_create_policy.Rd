@@ -2,7 +2,7 @@
 % Please edit documentation in R/create.R
 \name{rls_create_policy}
 \alias{rls_create_policy}
-\title{Create an RLS policy}
+\title{Create a row level security policy}
 \usage{
 rls_create_policy(con, policy)
 }
@@ -12,26 +12,38 @@ rls_create_policy(con, policy)
 \item{policy}{(list) a policy derived from \code{\link[=rls_construct_policy]{rls_construct_policy()}}}
 }
 \description{
-Create an RLS policy
+Create a row level security policy
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
+library(RPostgres)
+con <- dbConnect(Postgres())
+
+dbCreateTable(con, "sometable", mtcars)
+
 policy1 <- rls_construct_policy(
   name = "hide_confidential",
-  with = "confidential BOOLEAN",
-  using = "confidential = false"
+  on = "sometable",
+  using = "(true)"
 )
 policy1
-rls_create_policy(con, policy)
+rls_create_policy(con, policy1)
 rls_policies(con)
 
 policy2 <- rls_construct_policy(
   name = "policy_concerts",
-  with = "catgroup VARCHAR(10)",
-  using = "catgroup = 'Concerts'"
+  on = "sometable",
+  for_ = "SELECT",
+  using = "(true)"
 )
 policy2
 rls_create_policy(con, policy2)
 rls_policies(con)
+
+# cleanup
+rls_drop_policy(con, policy1)
+rls_drop_policy(con, policy2)
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
