@@ -7,10 +7,14 @@
 <url><loc>http://getwilds.org/rls/authors.html</loc></url>
 <url><loc>http://getwilds.org/rls/index.html</loc></url>
 <url><loc>http://getwilds.org/rls/news/index.html</loc></url>
+<url><loc>http://getwilds.org/rls/reference/has_postgres.html</loc></url>
 <url><loc>http://getwilds.org/rls/reference/index.html</loc></url>
 <url><loc>http://getwilds.org/rls/reference/rls-package.html</loc></url>
+<url><loc>http://getwilds.org/rls/reference/rls_check_status.html</loc></url>
 <url><loc>http://getwilds.org/rls/reference/rls_construct_policy.html</loc></url>
 <url><loc>http://getwilds.org/rls/reference/rls_create_policy.html</loc></url>
+<url><loc>http://getwilds.org/rls/reference/rls_drop_policy.html</loc></url>
+<url><loc>http://getwilds.org/rls/reference/rls_enable.html</loc></url>
 <url><loc>http://getwilds.org/rls/reference/rls_policies.html</loc></url>
 </urlset>
 
