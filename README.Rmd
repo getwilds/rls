@@ -31,8 +31,7 @@ con <- dbConnect(Postgres())
 
 Create a policy and add it to a table
 
-```r
-```
+xxx
 
 ## Bugs? Features?
 

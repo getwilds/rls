@@ -19,6 +19,21 @@ Development version
 pak::pak("getwilds/rls")
 ```
 
+## Golden path (NOT WORKING YET, README Driven development)
+
+Connect
+
+```r
+library(rls)
+library(DBI)
+library(RPostgres)
+con <- dbConnect(Postgres())
+```
+
+Create a policy and add it to a table
+
+xxx
+
 ## Bugs? Features?
 
 Open an issue on our [issue tracker](https://github.com/getwilds/sixtyfour/issues/).
