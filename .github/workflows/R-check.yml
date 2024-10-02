@@ -41,13 +41,13 @@ jobs:
         with:
           postgres-version: 14
 
-      - name: Create database
+      - name: Create database, non-Windows
         if: runner.os != 'Windows'
         run: |
           createdb ${USER}
         shell: bash
 
-      - name: Create database
+      - name: Create database Windows
         if: runner.os == 'Windows'
         run: |
           createdb ${USERNAME}
