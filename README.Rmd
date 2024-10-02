@@ -18,20 +18,9 @@ Development version
 pak::pak("getwilds/rls")
 ```
 
-## Golden path (NOT WORKING YET, README Driven development)
+## Get started
 
-Connect
-
-```r
-library(rls)
-library(DBI)
-library(RPostgres)
-con <- dbConnect(Postgres())
-```
-
-Create a policy and add it to a table
-
-xxx
+Go to the [Getting Stared vignette][vign] for a walk-through of using row level security with PostgreSQL.
 
 ## Bugs? Features?
 
@@ -48,3 +37,6 @@ Please note that the rls project is released with a [Contributor Code of Conduct
 ## License
 
 [MIT](LICENSE.md)
+
+
+[vign]: https://getwilds.org/rls/articles/rls.html
