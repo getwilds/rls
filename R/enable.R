@@ -22,7 +22,7 @@ rls_enable <- function(con, table) {
     RedshiftConnection = "ROW LEVEL SECURITY ON",
     PqConnection = "ENABLE ROW LEVEL SECURITY"
   )
-  invisible(dbExecute(con, glue("ALTER TABLE {table} {enable_chunk}")))
+  invisible(dbExecute(con, glue_safe("ALTER TABLE {table} {enable_chunk}")))
 }
 
 #' @export
@@ -33,5 +33,5 @@ rls_disable <- function(con, table) {
     RedshiftConnection = "ROW LEVEL SECURITY OFF",
     PqConnection = "DISABLE ROW LEVEL SECURITY"
   )
-  invisible(dbExecute(con, glue("ALTER TABLE {table} {enable_chunk}")))
+  invisible(dbExecute(con, glue_safe("ALTER TABLE {table} {enable_chunk}")))
 }
