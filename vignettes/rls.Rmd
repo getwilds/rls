@@ -1,0 +1,277 @@
+---
+title: "Getting Started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+Row Level Security for PostgreSQL and AWS Redshift.
+
+The following is a walk-through of using row level security in PostgreSQL, including checks to make sure policies behave as expected.
+
+
+``` r
+library(tibble)
+library(DBI)
+library(RPostgres)
+library(rls)
+```
+
+## Start PostgreSQL locally
+
+Start Postgres however you do that.
+
+
+## Create a connection
+
+
+``` r
+con <- dbConnect(Postgres())
+```
+
+
+
+## Create a table
+
+
+``` r
+invisible(dbExecute(con, "
+  CREATE TABLE passwd (
+  user_name             text UNIQUE NOT NULL,
+  pwhash                text,
+  uid                   int  PRIMARY KEY,
+  gid                   int  NOT NULL,
+  real_name             text NOT NULL,
+  home_phone            text,
+  extra_info            text,
+  home_dir              text NOT NULL,
+  shell                 text NOT NULL
+);
+"))
+```
+
+
+``` r
+sample_data <- tribble(
+  ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~extra_info, ~home_dir, ~shell,
+  'admin','xxx',0,0,'Admin','111-222-3333',NULL,'/root','/bin/dash',
+  'bob','xxx',1,1,'Bob','123-456-7890',NULL,'/home/bob','/bin/zsh',
+  'alice','xxx',2,1,'Alice','098-765-4321',NULL,'/home/alice','/bin/zsh'
+)
+dbAppendTable(con, "passwd", sample_data)
+#> [1] 3
+```
+
+## Create roles
+
+
+``` r
+# Administrator
+dbExecute(con, "CREATE ROLE admin")
+# Normal user
+dbExecute(con, "CREATE ROLE bob")
+# Another normal user
+dbExecute(con, "CREATE ROLE alice")
+```
+
+## Enable row level security
+
+Enable row level security with `rls_enable`
+
+
+``` r
+rls_enable(con, "passwd")
+```
+
+Then check that it worked with `rls_check_status`
+
+
+``` r
+rls_check_status(con, "passwd")
+#> # A tibble: 1 × 3
+#>   relname relrowsecurity relforcerowsecurity
+#>   <chr>   <lgl>          <lgl>              
+#> 1 passwd  TRUE           FALSE
+```
+
+## Create row level security policies
+
+`admin_all` = Administrator can see all rows and add any rows
+
+
+``` r
+(policy1 <- rls_construct_policy(
+  name = "admin_all",
+  on = "passwd",
+  to = "admin",
+  using = "(true)",
+  with = "(true)"
+))
+#> <rls_policy>
+#>   policy name: admin_all
+#>   on: passwd
+#>   to: admin
+#>   using: (true)
+#>   with: (true)
+rls_create_policy(con, policy1)
+rls_policies(con)
+#> # A tibble: 1 × 8
+#>   schemaname tablename policyname permissive roles      cmd   qual  with_check
+#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr> <chr> <chr>     
+#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL   true  true
+```
+
+`all_view` = Normal users can view all rows
+
+
+``` r
+(policy2 <- rls_construct_policy(
+  name = "all_view",
+  on = "passwd",
+  for_ = "SELECT",
+  using = "(true)"
+))
+#> <rls_policy>
+#>   policy name: all_view
+#>   on: passwd
+#>   for: SELECT
+#>   using: (true)
+rls_create_policy(con, policy2)
+rls_policies(con)
+#> # A tibble: 2 × 8
+#>   schemaname tablename policyname permissive roles      cmd    qual  with_check
+#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr> <chr>     
+#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true  true      
+#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true  <NA>
+```
+
+`user_mod` = Normal users can update their own records, but limit which shells a normal user is allowed to set
+
+
+``` r
+(policy3 <- rls_construct_policy(
+  name = "user_mod",
+  on = "passwd",
+  for_ = "UPDATE",
+  using = "(current_user = user_name)",
+  with = "(
+    current_user = user_name AND
+    shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
+  )"
+))
+#> <rls_policy>
+#>   policy name: user_mod
+#>   on: passwd
+#>   for: UPDATE
+#>   using: (current_user = user_name)
+#>   with: (
+#>     current_user = user_name AND
+#>     shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
+#>   )
+rls_create_policy(con, policy3)
+rls_policies(con)
+#> # A tibble: 3 × 8
+#>   schemaname tablename policyname permissive roles      cmd    qual   with_check
+#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr>  <chr>     
+#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true   true      
+#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true   <NA>      
+#> 3 public     passwd    user_mod   PERMISSIVE {public}   UPDATE (CURR… ((CURRENT…
+```
+
+## Grant permissions
+
+Allow admin all normal rights
+
+
+``` r
+dbExecute(con, "GRANT SELECT, INSERT, UPDATE, DELETE ON passwd TO admin")
+```
+
+Users only get select access on public columns
+
+
+``` r
+dbExecute(con, "GRANT SELECT
+  (user_name, uid, gid, real_name, home_phone, extra_info, home_dir, shell)
+  ON passwd TO public"
+)
+```
+
+Allow users to update certain columns
+
+
+``` r
+dbExecute(con, "GRANT UPDATE
+  (pwhash, real_name, home_phone, extra_info, shell)
+  ON passwd TO public"
+)
+```
+
+## Ensure the system behaves as expected
+
+
+``` r
+dbExecute(con, "SET SESSION AUTHORIZATION admin")
+#> [1] 0
+dbGetQuery(con, "SELECT * from passwd")
+#>   user_name pwhash uid gid real_name   home_phone extra_info    home_dir
+#> 1     admin    xxx   0   0     Admin 111-222-3333       <NA>       /root
+#> 2       bob    xxx   1   1       Bob 123-456-7890       <NA>   /home/bob
+#> 3     alice    xxx   2   1     Alice 098-765-4321       <NA> /home/alice
+#>       shell
+#> 1 /bin/dash
+#> 2  /bin/zsh
+#> 3  /bin/zsh
+```
+
+
+``` r
+dbExecute(con, "SET SESSION AUTHORIZATION alice")
+#> [1] 0
+dbGetQuery(con, "SELECT * from passwd")
+#> Error: Failed to fetch row : ERROR:  permission denied for table passwd
+```
+
+
+``` r
+dbGetQuery(con, "SELECT user_name,real_name,home_phone,extra_info,home_dir,shell FROM passwd")
+#>   user_name real_name   home_phone extra_info    home_dir     shell
+#> 1     admin     Admin 111-222-3333       <NA>       /root /bin/dash
+#> 2       bob       Bob 123-456-7890       <NA>   /home/bob  /bin/zsh
+#> 3     alice     Alice 098-765-4321       <NA> /home/alice  /bin/zsh
+```
+
+
+``` r
+dbExecute(con, "UPDATE passwd SET user_name = 'joe'")
+#> Error: Failed to fetch row : ERROR:  permission denied for table passwd
+```
+
+
+``` r
+dbExecute(con, "UPDATE passwd SET real_name = 'Alice Doe'")
+#> [1] 1
+dbExecute(con, "UPDATE passwd SET real_name = 'John Doe' WHERE user_name = 'admin'")
+#> [1] 0
+dbExecute(con, "UPDATE passwd SET shell = '/bin/xx'")
+#> Error: Failed to fetch row : ERROR:  new row violates row-level security policy for table "passwd"
+dbExecute(con, "DELETE from passwd")
+#> Error: Failed to fetch row : ERROR:  permission denied for table passwd
+dbExecute(con, "INSERT INTO passwd (user_name) VALUES ('xxx')")
+#> Error: Failed to fetch row : ERROR:  permission denied for table passwd
+```
+
+Alice can change her own password; RLS silently prevents updating other rows
+
+
+``` r
+dbExecute(con, "UPDATE passwd SET pwhash = 'abc'")
+#> [1] 1
+```
+
+
+

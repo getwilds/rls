@@ -40,3 +40,8 @@ style_file:
 
 style_package:
 	${RSCRIPT} -e "styler::style_pkg()"
+
+vign:
+	cd vignettes;\
+	${RSCRIPT} -e "Sys.setenv(NOT_CRAN='true'); knitr::knit('rls.Rmd.og', output = 'rls.Rmd')";\
+	cd ..
