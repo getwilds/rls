@@ -1,8 +1,6 @@
 #' Create a row level security policy
 #'
 #' @export
-#' @importFrom glue glue
-#' @importFrom DBI dbExecute
 #' @param con a DBI database connection object
 #' @param policy (list) a policy derived from [rls_construct_policy()]
 #' @return NULL
