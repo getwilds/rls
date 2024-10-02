@@ -3,7 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   rls: rls.html
-last_built: 2024-10-02T23:18Z
+last_built: 2024-10-02T23:22Z
 urls:
   reference: http://getwilds.org/rls/reference
   article: http://getwilds.org/rls/articles
