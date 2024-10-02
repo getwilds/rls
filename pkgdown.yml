@@ -1,8 +1,9 @@
 pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
-articles: {}
-last_built: 2024-10-02T19:10Z
+articles:
+  rls: rls.html
+last_built: 2024-10-02T23:18Z
 urls:
   reference: http://getwilds.org/rls/reference
   article: http://getwilds.org/rls/articles
