@@ -15,6 +15,10 @@ rls_drop_policy(con, policy = NULL, name = NULL, table = NULL)
 
 \item{table}{(character) a table name. optional}
 }
+\value{
+a scalar numeric that specifies the number of rows affected
+by the statement, invisibly
+}
 \description{
 Drop a row level security policy
 }

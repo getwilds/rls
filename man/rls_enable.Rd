@@ -15,6 +15,10 @@ postgres and redshift connections}
 
 \item{table}{(character) a table name. required}
 }
+\value{
+a scalar numeric that specifies the number of rows affected
+by the statement, invisibly
+}
 \description{
 Enable row level security on a table
 }
@@ -24,10 +28,12 @@ library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
 dbListTables(con)
-rls_enable(con, table = "accounts")
-rls_check_status(con, "accounts")
-rls_disable(con, table = "accounts")
-rls_check_status(con, "accounts")
+dbWriteTable(con, "mtcars", mtcars, temporary = TRUE)
+rls_enable(con, table = "mtcars")
+rls_check_status(con, "mtcars")
+rls_disable(con, table = "mtcars")
+rls_check_status(con, "mtcars")
+dbRemoveTable(con, "mtcars")
 dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

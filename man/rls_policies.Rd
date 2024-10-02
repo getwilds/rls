@@ -29,7 +29,16 @@ different table names for RLS policies:
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
+dbWriteTable(con, "attitude", attitude, temporary = TRUE)
+my_policy <- rls_construct_policy(
+  name = "all_view",
+  on = "attitude",
+  for_ = "SELECT",
+  using = "(true)"
+)
+rls_create_policy(con, my_policy)
 rls_policies(con)
+dbRemoveTable(con, "attitude")
 dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

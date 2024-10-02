@@ -13,7 +13,12 @@ postgres and redshift connections}
 \item{table}{(character) a table name. required}
 }
 \value{
-tibble
+tibble with columns:
+\itemize{
+\item relname
+\item relrowsecurity
+\item relforcerowsecurity
+}
 }
 \description{
 Check row level security status of a table

@@ -2,10 +2,13 @@
 #'
 #' @export
 #' @inheritParams rls_enable
-#' @return tibble
+#' @return tibble with columns:
+#' - relname
+#' - relrowsecurity
+#' - relforcerowsecurity
 rls_check_status <- function(con, table) {
-  query <- glue("select relname, relrowsecurity, relforcerowsecurity
+  query <- glue_safe("select relname, relrowsecurity, relforcerowsecurity
 		from pg_class
 		where oid = '{table}'::regclass")
-  dbGetQuery(con, query)
+  as_tibble(dbGetQuery(con, query))
 }

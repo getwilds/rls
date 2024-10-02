@@ -3,7 +3,8 @@
 #' @export
 #' @param con a DBI database connection object
 #' @param policy (list) a policy derived from [rls_construct_policy()]
-#' @return NULL
+#' @return a scalar numeric that specifies the number of rows affected
+#' by the statement, invisibly
 #' @examplesIf interactive() && has_postgres()
 #' library(DBI)
 #' library(RPostgres)
@@ -48,7 +49,7 @@ rls_create_policy <- function(con, policy) {
     {combine_if('WITH CHECK', policy$with)}
   ")
   sql_create_policy <- gsub("\n\\s+\n", "\n", sql_create_policy)
-  dbExecute(con, sql_create_policy)
+  invisible(dbExecute(con, sql_create_policy))
 }
 
 # {ifelse(!is.null(policy$for_), paste('FOR', policy$for_), '')}

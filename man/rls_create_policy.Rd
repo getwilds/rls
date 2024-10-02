@@ -11,6 +11,10 @@ rls_create_policy(con, policy)
 
 \item{policy}{(list) a policy derived from \code{\link[=rls_construct_policy]{rls_construct_policy()}}}
 }
+\value{
+a scalar numeric that specifies the number of rows affected
+by the statement, invisibly
+}
 \description{
 Create a row level security policy
 }

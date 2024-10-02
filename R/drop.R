@@ -8,7 +8,8 @@
 #' @param table (character) a table name. optional
 #' @details If `policy` is supplied, `name` and `table` are not required. If
 #' `policy` is not supplied, `name` and `table` need to be supplied.
-#' @return NULL
+#' @return a scalar numeric that specifies the number of rows affected
+#' by the statement, invisibly
 #' @references <https://www.postgresql.org/docs/current/sql-droppolicy.html>
 #' @examplesIf interactive() && has_postgres()
 #' library(DBI)
@@ -43,5 +44,5 @@ rls_drop_policy <- function(con, policy = NULL, name = NULL, table = NULL) {
       rlang::abort("if `policy` is NULL, name & table must be non-NULL")
     }
   }
-  dbExecute(con, glue("{drop_statement} POLICY {name} ON {table}"))
+  invisible(dbExecute(con, glue("{drop_statement} POLICY {name} ON {table}")))
 }

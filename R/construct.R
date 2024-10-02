@@ -13,7 +13,7 @@
 #' clause of a query
 #' @param with (character) the check condition
 #' @references <https://www.postgresql.org/docs/current/sql-createpolicy.html>
-#' @return s3 object of class `rls_policy_redshift`
+#' @return s3 object of class `rls_policy`
 #' @examples
 #' x <- rls_construct_policy(
 #'   name = "hide_confidential",

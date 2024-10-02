@@ -33,7 +33,7 @@ clause of a query}
 \item{with}{(character) the check condition}
 }
 \value{
-s3 object of class \code{rls_policy_redshift}
+s3 object of class \code{rls_policy}
 }
 \description{
 Construct a row level security policy
