@@ -32,8 +32,26 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: ankane/setup-postgres@v1
+        if: runner.os != 'Windows'
         with:
           postgres-version: 17
+
+      - uses: ankane/setup-postgres@v1
+        if: runner.os == 'Windows'
+        with:
+          postgres-version: 14
+
+      - name: Create database
+        if: runner.os != 'Windows'
+        run: |
+          createdb ${USER}
+        shell: bash
+
+      - name: Create database
+        if: runner.os == 'Windows'
+        run: |
+          createdb ${USERNAME}
+        shell: bash
 
       - uses: r-lib/actions/setup-pandoc@v2
 
