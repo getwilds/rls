@@ -67,7 +67,6 @@ invisible(dbExecute(con, "
   shell                 text NOT NULL
 );
 "))
-#> Error: Failed to fetch row : ERROR:  relation "passwd" already exists
 ```
 
 Some sample data
@@ -91,17 +90,6 @@ rows_append(
   copy_inline(con, sample_data),
   in_place = TRUE
 )
-#> Error in `rows_append()`:
-#> ! Can't modify database table "passwd".
-#> ℹ Using SQL: INSERT INTO "passwd" ("user_name", "pwhash", "uid", "gid", "real_name", "home_phone", "home_dir", "shell") SELECT * FROM (
-#>   SELECT CAST("user_name" AS TEXT) AS "user_name", CAST("pwhash" AS TEXT) AS "pwhash", CAST("uid" AS NUMERIC) AS "uid", CAST("gid" AS
-#>   NUMERIC) AS "gid", CAST("real_name" AS TEXT) AS "real_name", CAST("home_phone" AS TEXT) AS "home_phone", CAST("home_dir" AS TEXT) AS
-#>   "home_dir", CAST("shell" AS TEXT) AS "shell" FROM ( VALUES ('admin', 'xxx', 0.0, 0.0, 'Admin', '111-222-3333', '/root', '/bin/dash'),
-#>   ('bob', 'xxx', 1.0, 1.0, 'Bob', '123-456-7890', '/home/bob', '/bin/zsh'), ('alice', 'xxx', 2.0, 1.0, 'Alice', '098-765-4321',
-#>   '/home/alice', '/bin/zsh') ) AS drvd("user_name", "pwhash", "uid", "gid", "real_name", "home_phone", "home_dir", "shell") ) AS "...y"
-#> Caused by error:
-#> ! Failed to fetch row : ERROR:  duplicate key value violates unique constraint "passwd_pkey"
-#> DETAIL:  Key (uid)=(0) already exists.
 ```
 
 Check that the data is in the table
@@ -111,11 +99,11 @@ Check that the data is in the table
 tbl(con, "passwd")
 #> # Source:   table<"passwd"> [3 x 8]
 #> # Database: postgres  [schambe3@/tmp:5432/schambe3]
-#>   user_name pwhash   uid   gid real_name   home_phone   home_dir    shell    
-#>   <chr>     <chr>  <int> <int> <chr>       <chr>        <chr>       <chr>    
-#> 1 bob       xxx        1     1 Bob         123-456-7890 /home/bob   /bin/zsh 
-#> 2 alice     xxx        2     1 Alice       098-765-4321 /home/alice /bin/zsh 
-#> 3 admin     xxx        0     0 Pink Dragon 111-222-3333 /root       /bin/dash
+#>   user_name pwhash   uid   gid real_name home_phone   home_dir    shell    
+#>   <chr>     <chr>  <int> <int> <chr>     <chr>        <chr>       <chr>    
+#> 1 admin     xxx        0     0 Admin     111-222-3333 /root       /bin/dash
+#> 2 bob       xxx        1     1 Bob       123-456-7890 /home/bob   /bin/zsh 
+#> 3 alice     xxx        2     1 Alice     098-765-4321 /home/alice /bin/zsh
 ```
 
 ## Create roles
@@ -124,13 +112,10 @@ tbl(con, "passwd")
 ``` r
 # Administrator
 dbExecute(con, "CREATE ROLE admin")
-#> Error: Failed to fetch row : ERROR:  role "admin" already exists
 # Normal user
 dbExecute(con, "CREATE ROLE bob")
-#> Error: Failed to fetch row : ERROR:  role "bob" already exists
 # Another normal user
 dbExecute(con, "CREATE ROLE alice")
-#> Error: Failed to fetch row : ERROR:  role "alice" already exists
 ```
 
 ## Enable row level security
@@ -161,26 +146,23 @@ rls_check_status(con, "passwd")
 ``` r
 (policy1 <- rls_construct_policy(
   name = "admin_all",
-  on = "passwd",
-  to = "admin",
+  table = "passwd",
+  role = "admin",
   using = "(true)",
-  with = "(true)"
+  check = "(true)"
 ))
 #> <rls_policy>
 #>   policy name: admin_all
-#>   on: passwd
-#>   to: admin
+#>   table: passwd
+#>   role: admin
 #>   using: (true)
-#>   with: (true)
+#>   check: (true)
 rls_create_policy(con, policy1)
-#> Error: Failed to fetch row : ERROR:  policy "admin_all" for table "passwd" already exists
 rls_policies(con)
-#> # A tibble: 3 × 8
-#>   schemaname tablename policyname permissive roles      cmd    qual   with_check
-#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr>  <chr>     
-#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true   true      
-#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true   <NA>      
-#> 3 public     passwd    user_mod   PERMISSIVE {public}   UPDATE (CURR… ((CURRENT…
+#> # A tibble: 1 × 8
+#>   schemaname tablename policyname permissive roles      cmd   qual  with_check
+#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr> <chr> <chr>     
+#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL   true  true
 ```
 
 `all_view` = Normal users can view all rows
@@ -189,24 +171,22 @@ rls_policies(con)
 ``` r
 (policy2 <- rls_construct_policy(
   name = "all_view",
-  on = "passwd",
-  for_ = "SELECT",
+  table = "passwd",
+  command = "SELECT",
   using = "(true)"
 ))
 #> <rls_policy>
 #>   policy name: all_view
-#>   on: passwd
-#>   for: SELECT
+#>   table: passwd
+#>   command: SELECT
 #>   using: (true)
 rls_create_policy(con, policy2)
-#> Error: Failed to fetch row : ERROR:  policy "all_view" for table "passwd" already exists
 rls_policies(con)
-#> # A tibble: 3 × 8
-#>   schemaname tablename policyname permissive roles      cmd    qual   with_check
-#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr>  <chr>     
-#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true   true      
-#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true   <NA>      
-#> 3 public     passwd    user_mod   PERMISSIVE {public}   UPDATE (CURR… ((CURRENT…
+#> # A tibble: 2 × 8
+#>   schemaname tablename policyname permissive roles      cmd    qual  with_check
+#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr> <chr>     
+#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true  true      
+#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true  <NA>
 ```
 
 `user_mod` = Normal users can update their own records, but limit
@@ -216,25 +196,24 @@ which shells a normal user is allowed to set
 ``` r
 (policy3 <- rls_construct_policy(
   name = "user_mod",
-  on = "passwd",
-  for_ = "UPDATE",
+  table = "passwd",
+  command = "UPDATE",
   using = "(current_user = user_name)",
-  with = "(
+  check = "(
     current_user = user_name AND
     shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
   )"
 ))
 #> <rls_policy>
 #>   policy name: user_mod
-#>   on: passwd
-#>   for: UPDATE
+#>   table: passwd
+#>   command: UPDATE
 #>   using: (current_user = user_name)
-#>   with: (
+#>   check: (
 #>     current_user = user_name AND
 #>     shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
 #>   )
 rls_create_policy(con, policy3)
-#> Error: Failed to fetch row : ERROR:  policy "user_mod" for table "passwd" already exists
 rls_policies(con)
 #> # A tibble: 3 × 8
 #>   schemaname tablename policyname permissive roles      cmd    qual   with_check
@@ -284,11 +263,11 @@ dbExecute(con, "SET SESSION AUTHORIZATION admin")
 tbl(con, "passwd")
 #> # Source:   table<"passwd"> [3 x 8]
 #> # Database: postgres  [schambe3@/tmp:5432/schambe3]
-#>   user_name pwhash   uid   gid real_name   home_phone   home_dir    shell    
-#>   <chr>     <chr>  <int> <int> <chr>       <chr>        <chr>       <chr>    
-#> 1 bob       xxx        1     1 Bob         123-456-7890 /home/bob   /bin/zsh 
-#> 2 alice     xxx        2     1 Alice       098-765-4321 /home/alice /bin/zsh 
-#> 3 admin     xxx        0     0 Pink Dragon 111-222-3333 /root       /bin/dash
+#>   user_name pwhash   uid   gid real_name home_phone   home_dir    shell    
+#>   <chr>     <chr>  <int> <int> <chr>     <chr>        <chr>       <chr>    
+#> 1 admin     xxx        0     0 Admin     111-222-3333 /root       /bin/dash
+#> 2 bob       xxx        1     1 Bob       123-456-7890 /home/bob   /bin/zsh 
+#> 3 alice     xxx        2     1 Alice     098-765-4321 /home/alice /bin/zsh
 ```
 
 Alice can NOT access all columns
@@ -313,11 +292,11 @@ sql1 <- sql("SELECT user_name,real_name,home_phone,home_dir,shell FROM passwd")
 tbl(con, sql1)
 #> # Source:   SQL [3 x 5]
 #> # Database: postgres  [schambe3@/tmp:5432/schambe3]
-#>   user_name real_name   home_phone   home_dir    shell    
-#>   <chr>     <chr>       <chr>        <chr>       <chr>    
-#> 1 bob       Bob         123-456-7890 /home/bob   /bin/zsh 
-#> 2 alice     Alice       098-765-4321 /home/alice /bin/zsh 
-#> 3 admin     Pink Dragon 111-222-3333 /root       /bin/dash
+#>   user_name real_name home_phone   home_dir    shell    
+#>   <chr>     <chr>     <chr>        <chr>       <chr>    
+#> 1 admin     Admin     111-222-3333 /root       /bin/dash
+#> 2 bob       Bob       123-456-7890 /home/bob   /bin/zsh 
+#> 3 alice     Alice     098-765-4321 /home/alice /bin/zsh
 ```
 
 Alice can not do UPDATE operations on certain columns

@@ -119,10 +119,10 @@ rls_check_status(con, "passwd")
 ```{r}
 (policy1 <- rls_construct_policy(
   name = "admin_all",
-  on = "passwd",
-  to = "admin",
+  table = "passwd",
+  role = "admin",
   using = "(true)",
-  with = "(true)"
+  check = "(true)"
 ))
 rls_create_policy(con, policy1)
 rls_policies(con)
@@ -133,8 +133,8 @@ rls_policies(con)
 ```{r}
 (policy2 <- rls_construct_policy(
   name = "all_view",
-  on = "passwd",
-  for_ = "SELECT",
+  table = "passwd",
+  command = "SELECT",
   using = "(true)"
 ))
 rls_create_policy(con, policy2)
@@ -147,10 +147,10 @@ which shells a normal user is allowed to set
 ```{r}
 (policy3 <- rls_construct_policy(
   name = "user_mod",
-  on = "passwd",
-  for_ = "UPDATE",
+  table = "passwd",
+  command = "UPDATE",
   using = "(current_user = user_name)",
-  with = "(
+  check = "(
     current_user = user_name AND
     shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
   )"
