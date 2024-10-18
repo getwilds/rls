@@ -22,6 +22,8 @@ The following is a walk-through of using row level security in PostgreSQL, inclu
 library(tibble)
 library(DBI)
 library(RPostgres)
+library(dplyr)
+library(dbplyr)
 library(rls)
 ```
 
@@ -41,6 +43,8 @@ user <- dbGetQuery(con, "select current_user")$current_user
 
 ## Create a table
 
+Create the table (with no data)
+
 ```{r}
 invisible(dbExecute(con, "
   CREATE TABLE passwd (
@@ -50,21 +54,37 @@ invisible(dbExecute(con, "
   gid                   int  NOT NULL,
   real_name             text NOT NULL,
   home_phone            text,
-  extra_info            text,
   home_dir              text NOT NULL,
   shell                 text NOT NULL
 );
 "))
 ```
 
+Some sample data
+
 ```{r}
 sample_data <- tribble(
-  ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~extra_info, ~home_dir, ~shell,
-  'admin','xxx',0,0,'Admin','111-222-3333',NULL,'/root','/bin/dash',
-  'bob','xxx',1,1,'Bob','123-456-7890',NULL,'/home/bob','/bin/zsh',
-  'alice','xxx',2,1,'Alice','098-765-4321',NULL,'/home/alice','/bin/zsh'
+  ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~home_dir, ~shell,
+  'admin','xxx',0,0,'Admin','111-222-3333','/root','/bin/dash',
+  'bob','xxx',1,1,'Bob','123-456-7890','/home/bob','/bin/zsh',
+  'alice','xxx',2,1,'Alice','098-765-4321','/home/alice','/bin/zsh'
 )
-dbAppendTable(con, "passwd", sample_data)
+```
+
+Append rows to the `passwd` table
+
+```{r}
+rows_append(
+  tbl(con, "passwd"),
+  copy_inline(con, sample_data),
+  in_place = TRUE
+)
+```
+
+Check that the data is in the table
+
+```{r}
+tbl(con, "passwd")
 ```
 
 ## Create roles
@@ -121,7 +141,8 @@ rls_create_policy(con, policy2)
 rls_policies(con)
 ```
 
-`user_mod` = Normal users can update their own records, but limit which shells a normal user is allowed to set
+`user_mod` = Normal users can update their own records, but limit
+which shells a normal user is allowed to set
 
 ```{r}
 (policy3 <- rls_construct_policy(
@@ -150,7 +171,7 @@ Users only get select access on public columns
 
 ```{r results="hide"}
 dbExecute(con, "GRANT SELECT
-  (user_name, uid, gid, real_name, home_phone, extra_info, home_dir, shell)
+  (user_name, uid, gid, real_name, home_phone, home_dir, shell)
   ON passwd TO public"
 )
 ```
@@ -159,40 +180,71 @@ Allow users to update certain columns
 
 ```{r results="hide"}
 dbExecute(con, "GRANT UPDATE
-  (pwhash, real_name, home_phone, extra_info, shell)
+  (pwhash, real_name, home_phone, shell)
   ON passwd TO public"
 )
 ```
 
 ## Ensure the system behaves as expected
 
+Admin can access all columns
+
 ```{r}
 dbExecute(con, "SET SESSION AUTHORIZATION admin")
-dbGetQuery(con, "SELECT * from passwd")
+tbl(con, "passwd")
 ```
+
+Alice can NOT access all columns
 
 ```{r error=TRUE}
 dbExecute(con, "SET SESSION AUTHORIZATION alice")
-dbGetQuery(con, "SELECT * from passwd")
+tbl(con, "passwd") # "passwd" here means "SELECT * from passwd"
 ```
 
+Alice can access all columns except for `pwhash`
+
 ```{r}
-dbGetQuery(con, "SELECT user_name,real_name,home_phone,extra_info,home_dir,shell FROM passwd")
+sql1 <- sql("SELECT user_name,real_name,home_phone,home_dir,shell FROM passwd")
+tbl(con, sql1)
 ```
+
+Alice can not do UPDATE operations on certain columns
+(in this case `user_name`)
 
 ```{r error=TRUE}
 dbExecute(con, "UPDATE passwd SET user_name = 'joe'")
 ```
 
+Alice can however update `real_name`
+
 ```{r error=TRUE}
 dbExecute(con, "UPDATE passwd SET real_name = 'Alice Doe'")
+```
+
+She can update `real_name`, but the update doesn't alter any rows
+when it has a WHERE clause on `user_name`
+
+```{r}
 dbExecute(con, "UPDATE passwd SET real_name = 'John Doe' WHERE user_name = 'admin'")
+```
+
+Alice can not update the `shell` column to an invalid value as
+defined by our row-level security policy above
+
+```{r error=TRUE}
 dbExecute(con, "UPDATE passwd SET shell = '/bin/xx'")
+```
+
+Alice can not delete the `passwd` table and can not do any insert
+operations
+
+```{r error=TRUE}
 dbExecute(con, "DELETE from passwd")
 dbExecute(con, "INSERT INTO passwd (user_name) VALUES ('xxx')")
 ```
 
-Alice can change her own password; RLS silently prevents updating other rows
+Alice can change her own password; RLS silently prevents updating
+other rows
 
 ```{r}
 dbExecute(con, "UPDATE passwd SET pwhash = 'abc'")

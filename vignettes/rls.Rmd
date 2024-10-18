@@ -18,13 +18,27 @@ The following is a walk-through of using row level security in PostgreSQL, inclu
 library(tibble)
 library(DBI)
 library(RPostgres)
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+library(dbplyr)
+#> 
+#> Attaching package: 'dbplyr'
+#> The following objects are masked from 'package:dplyr':
+#> 
+#>     ident, sql
 library(rls)
 ```
 
 ## Start PostgreSQL locally
 
 Start Postgres however you do that.
-
 
 ## Create a connection
 
@@ -37,6 +51,8 @@ con <- dbConnect(Postgres())
 
 ## Create a table
 
+Create the table (with no data)
+
 
 ``` r
 invisible(dbExecute(con, "
@@ -47,23 +63,59 @@ invisible(dbExecute(con, "
   gid                   int  NOT NULL,
   real_name             text NOT NULL,
   home_phone            text,
-  extra_info            text,
   home_dir              text NOT NULL,
   shell                 text NOT NULL
 );
 "))
+#> Error: Failed to fetch row : ERROR:  relation "passwd" already exists
 ```
+
+Some sample data
 
 
 ``` r
 sample_data <- tribble(
-  ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~extra_info, ~home_dir, ~shell,
-  'admin','xxx',0,0,'Admin','111-222-3333',NULL,'/root','/bin/dash',
-  'bob','xxx',1,1,'Bob','123-456-7890',NULL,'/home/bob','/bin/zsh',
-  'alice','xxx',2,1,'Alice','098-765-4321',NULL,'/home/alice','/bin/zsh'
+  ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~home_dir, ~shell,
+  'admin','xxx',0,0,'Admin','111-222-3333','/root','/bin/dash',
+  'bob','xxx',1,1,'Bob','123-456-7890','/home/bob','/bin/zsh',
+  'alice','xxx',2,1,'Alice','098-765-4321','/home/alice','/bin/zsh'
 )
-dbAppendTable(con, "passwd", sample_data)
-#> [1] 3
+```
+
+Append rows to the `passwd` table
+
+
+``` r
+rows_append(
+  tbl(con, "passwd"),
+  copy_inline(con, sample_data),
+  in_place = TRUE
+)
+#> Error in `rows_append()`:
+#> ! Can't modify database table "passwd".
+#> ℹ Using SQL: INSERT INTO "passwd" ("user_name", "pwhash", "uid", "gid", "real_name", "home_phone", "home_dir", "shell") SELECT * FROM (
+#>   SELECT CAST("user_name" AS TEXT) AS "user_name", CAST("pwhash" AS TEXT) AS "pwhash", CAST("uid" AS NUMERIC) AS "uid", CAST("gid" AS
+#>   NUMERIC) AS "gid", CAST("real_name" AS TEXT) AS "real_name", CAST("home_phone" AS TEXT) AS "home_phone", CAST("home_dir" AS TEXT) AS
+#>   "home_dir", CAST("shell" AS TEXT) AS "shell" FROM ( VALUES ('admin', 'xxx', 0.0, 0.0, 'Admin', '111-222-3333', '/root', '/bin/dash'),
+#>   ('bob', 'xxx', 1.0, 1.0, 'Bob', '123-456-7890', '/home/bob', '/bin/zsh'), ('alice', 'xxx', 2.0, 1.0, 'Alice', '098-765-4321',
+#>   '/home/alice', '/bin/zsh') ) AS drvd("user_name", "pwhash", "uid", "gid", "real_name", "home_phone", "home_dir", "shell") ) AS "...y"
+#> Caused by error:
+#> ! Failed to fetch row : ERROR:  duplicate key value violates unique constraint "passwd_pkey"
+#> DETAIL:  Key (uid)=(0) already exists.
+```
+
+Check that the data is in the table
+
+
+``` r
+tbl(con, "passwd")
+#> # Source:   table<"passwd"> [3 x 8]
+#> # Database: postgres  [schambe3@/tmp:5432/schambe3]
+#>   user_name pwhash   uid   gid real_name   home_phone   home_dir    shell    
+#>   <chr>     <chr>  <int> <int> <chr>       <chr>        <chr>       <chr>    
+#> 1 bob       xxx        1     1 Bob         123-456-7890 /home/bob   /bin/zsh 
+#> 2 alice     xxx        2     1 Alice       098-765-4321 /home/alice /bin/zsh 
+#> 3 admin     xxx        0     0 Pink Dragon 111-222-3333 /root       /bin/dash
 ```
 
 ## Create roles
@@ -72,10 +124,13 @@ dbAppendTable(con, "passwd", sample_data)
 ``` r
 # Administrator
 dbExecute(con, "CREATE ROLE admin")
+#> Error: Failed to fetch row : ERROR:  role "admin" already exists
 # Normal user
 dbExecute(con, "CREATE ROLE bob")
+#> Error: Failed to fetch row : ERROR:  role "bob" already exists
 # Another normal user
 dbExecute(con, "CREATE ROLE alice")
+#> Error: Failed to fetch row : ERROR:  role "alice" already exists
 ```
 
 ## Enable row level security
@@ -118,11 +173,14 @@ rls_check_status(con, "passwd")
 #>   using: (true)
 #>   with: (true)
 rls_create_policy(con, policy1)
+#> Error: Failed to fetch row : ERROR:  policy "admin_all" for table "passwd" already exists
 rls_policies(con)
-#> # A tibble: 1 × 8
-#>   schemaname tablename policyname permissive roles      cmd   qual  with_check
-#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr> <chr> <chr>     
-#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL   true  true
+#> # A tibble: 3 × 8
+#>   schemaname tablename policyname permissive roles      cmd    qual   with_check
+#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr>  <chr>     
+#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true   true      
+#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true   <NA>      
+#> 3 public     passwd    user_mod   PERMISSIVE {public}   UPDATE (CURR… ((CURRENT…
 ```
 
 `all_view` = Normal users can view all rows
@@ -141,15 +199,18 @@ rls_policies(con)
 #>   for: SELECT
 #>   using: (true)
 rls_create_policy(con, policy2)
+#> Error: Failed to fetch row : ERROR:  policy "all_view" for table "passwd" already exists
 rls_policies(con)
-#> # A tibble: 2 × 8
-#>   schemaname tablename policyname permissive roles      cmd    qual  with_check
-#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr> <chr>     
-#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true  true      
-#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true  <NA>
+#> # A tibble: 3 × 8
+#>   schemaname tablename policyname permissive roles      cmd    qual   with_check
+#>   <chr>      <chr>     <chr>      <chr>      <pq__name> <chr>  <chr>  <chr>     
+#> 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL    true   true      
+#> 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true   <NA>      
+#> 3 public     passwd    user_mod   PERMISSIVE {public}   UPDATE (CURR… ((CURRENT…
 ```
 
-`user_mod` = Normal users can update their own records, but limit which shells a normal user is allowed to set
+`user_mod` = Normal users can update their own records, but limit
+which shells a normal user is allowed to set
 
 
 ``` r
@@ -173,6 +234,7 @@ rls_policies(con)
 #>     shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
 #>   )
 rls_create_policy(con, policy3)
+#> Error: Failed to fetch row : ERROR:  policy "user_mod" for table "passwd" already exists
 rls_policies(con)
 #> # A tibble: 3 × 8
 #>   schemaname tablename policyname permissive roles      cmd    qual   with_check
@@ -196,7 +258,7 @@ Users only get select access on public columns
 
 ``` r
 dbExecute(con, "GRANT SELECT
-  (user_name, uid, gid, real_name, home_phone, extra_info, home_dir, shell)
+  (user_name, uid, gid, real_name, home_phone, home_dir, shell)
   ON passwd TO public"
 )
 ```
@@ -206,44 +268,60 @@ Allow users to update certain columns
 
 ``` r
 dbExecute(con, "GRANT UPDATE
-  (pwhash, real_name, home_phone, extra_info, shell)
+  (pwhash, real_name, home_phone, shell)
   ON passwd TO public"
 )
 ```
 
 ## Ensure the system behaves as expected
 
+Admin can access all columns
+
 
 ``` r
 dbExecute(con, "SET SESSION AUTHORIZATION admin")
 #> [1] 0
-dbGetQuery(con, "SELECT * from passwd")
-#>   user_name pwhash uid gid real_name   home_phone extra_info    home_dir
-#> 1     admin    xxx   0   0     Admin 111-222-3333       <NA>       /root
-#> 2       bob    xxx   1   1       Bob 123-456-7890       <NA>   /home/bob
-#> 3     alice    xxx   2   1     Alice 098-765-4321       <NA> /home/alice
-#>       shell
-#> 1 /bin/dash
-#> 2  /bin/zsh
-#> 3  /bin/zsh
+tbl(con, "passwd")
+#> # Source:   table<"passwd"> [3 x 8]
+#> # Database: postgres  [schambe3@/tmp:5432/schambe3]
+#>   user_name pwhash   uid   gid real_name   home_phone   home_dir    shell    
+#>   <chr>     <chr>  <int> <int> <chr>       <chr>        <chr>       <chr>    
+#> 1 bob       xxx        1     1 Bob         123-456-7890 /home/bob   /bin/zsh 
+#> 2 alice     xxx        2     1 Alice       098-765-4321 /home/alice /bin/zsh 
+#> 3 admin     xxx        0     0 Pink Dragon 111-222-3333 /root       /bin/dash
 ```
+
+Alice can NOT access all columns
 
 
 ``` r
 dbExecute(con, "SET SESSION AUTHORIZATION alice")
 #> [1] 0
-dbGetQuery(con, "SELECT * from passwd")
-#> Error: Failed to fetch row : ERROR:  permission denied for table passwd
+tbl(con, "passwd") # "passwd" here means "SELECT * from passwd"
+#> Error in `db_query_fields.DBIConnection()`:
+#> ! Can't query fields.
+#> ℹ Using SQL: SELECT * FROM "passwd" AS "q01" WHERE (0 = 1)
+#> Caused by error:
+#> ! Failed to fetch row : ERROR:  permission denied for table passwd
 ```
+
+Alice can access all columns except for `pwhash`
 
 
 ``` r
-dbGetQuery(con, "SELECT user_name,real_name,home_phone,extra_info,home_dir,shell FROM passwd")
-#>   user_name real_name   home_phone extra_info    home_dir     shell
-#> 1     admin     Admin 111-222-3333       <NA>       /root /bin/dash
-#> 2       bob       Bob 123-456-7890       <NA>   /home/bob  /bin/zsh
-#> 3     alice     Alice 098-765-4321       <NA> /home/alice  /bin/zsh
+sql1 <- sql("SELECT user_name,real_name,home_phone,home_dir,shell FROM passwd")
+tbl(con, sql1)
+#> # Source:   SQL [3 x 5]
+#> # Database: postgres  [schambe3@/tmp:5432/schambe3]
+#>   user_name real_name   home_phone   home_dir    shell    
+#>   <chr>     <chr>       <chr>        <chr>       <chr>    
+#> 1 bob       Bob         123-456-7890 /home/bob   /bin/zsh 
+#> 2 alice     Alice       098-765-4321 /home/alice /bin/zsh 
+#> 3 admin     Pink Dragon 111-222-3333 /root       /bin/dash
 ```
+
+Alice can not do UPDATE operations on certain columns
+(in this case `user_name`)
 
 
 ``` r
@@ -251,21 +329,45 @@ dbExecute(con, "UPDATE passwd SET user_name = 'joe'")
 #> Error: Failed to fetch row : ERROR:  permission denied for table passwd
 ```
 
+Alice can however update `real_name`
+
 
 ``` r
 dbExecute(con, "UPDATE passwd SET real_name = 'Alice Doe'")
 #> [1] 1
+```
+
+She can update `real_name`, but the update doesn't alter any rows
+when it has a WHERE clause on `user_name`
+
+
+``` r
 dbExecute(con, "UPDATE passwd SET real_name = 'John Doe' WHERE user_name = 'admin'")
 #> [1] 0
+```
+
+Alice can not update the `shell` column to an invalid value as
+defined by our row-level security policy above
+
+
+``` r
 dbExecute(con, "UPDATE passwd SET shell = '/bin/xx'")
 #> Error: Failed to fetch row : ERROR:  new row violates row-level security policy for table "passwd"
+```
+
+Alice can not delete the `passwd` table and can not do any insert
+operations
+
+
+``` r
 dbExecute(con, "DELETE from passwd")
 #> Error: Failed to fetch row : ERROR:  permission denied for table passwd
 dbExecute(con, "INSERT INTO passwd (user_name) VALUES ('xxx')")
 #> Error: Failed to fetch row : ERROR:  permission denied for table passwd
 ```
 
-Alice can change her own password; RLS silently prevents updating other rows
+Alice can change her own password; RLS silently prevents updating
+other rows
 
 
 ``` r
