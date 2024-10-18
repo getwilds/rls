@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.91</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1.94</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,6 +68,21 @@ expected.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dbi.r-dbi.org" class="external-link">DBI</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpostgres.r-dbi.org" class="external-link">RPostgres</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter, lag</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dbplyr.tidyverse.org/" class="external-link">dbplyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'dbplyr'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:dplyr':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     ident, sql</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/getwilds/rls" class="external-link">rls</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="start-postgresql-locally">Start PostgreSQL locally<a class="anchor" aria-label="anchor" href="#start-postgresql-locally"></a>
@@ -83,6 +98,7 @@ expected.</p>
 <div class="section level2">
 <h2 id="create-a-table">Create a table<a class="anchor" aria-label="anchor" href="#create-a-table"></a>
 </h2>
+<p>Create the table (with no data)</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"</span></span>
 <span><span class="st">  CREATE TABLE passwd (</span></span>
@@ -92,25 +108,40 @@ expected.</p>
 <span><span class="st">  gid                   int  NOT NULL,</span></span>
 <span><span class="st">  real_name             text NOT NULL,</span></span>
 <span><span class="st">  home_phone            text,</span></span>
-<span><span class="st">  extra_info            text,</span></span>
 <span><span class="st">  home_dir              text NOT NULL,</span></span>
 <span><span class="st">  shell                 text NOT NULL</span></span>
 <span><span class="st">);</span></span>
 <span><span class="st">"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Some sample data</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
-<span>  <span class="op">~</span><span class="va">user_name</span>, <span class="op">~</span><span class="va">pwhash</span>, <span class="op">~</span><span class="va">uid</span>, <span class="op">~</span><span class="va">gid</span>, <span class="op">~</span><span class="va">real_name</span>, <span class="op">~</span><span class="va">home_phone</span>, <span class="op">~</span><span class="va">extra_info</span>, <span class="op">~</span><span class="va">home_dir</span>, <span class="op">~</span><span class="va">shell</span>,</span>
-<span>  <span class="st">'admin'</span>,<span class="st">'xxx'</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="st">'Admin'</span>,<span class="st">'111-222-3333'</span>,<span class="cn">NULL</span>,<span class="st">'/root'</span>,<span class="st">'/bin/dash'</span>,</span>
-<span>  <span class="st">'bob'</span>,<span class="st">'xxx'</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="st">'Bob'</span>,<span class="st">'123-456-7890'</span>,<span class="cn">NULL</span>,<span class="st">'/home/bob'</span>,<span class="st">'/bin/zsh'</span>,</span>
-<span>  <span class="st">'alice'</span>,<span class="st">'xxx'</span>,<span class="fl">2</span>,<span class="fl">1</span>,<span class="st">'Alice'</span>,<span class="st">'098-765-4321'</span>,<span class="cn">NULL</span>,<span class="st">'/home/alice'</span>,<span class="st">'/bin/zsh'</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbAppendTable.html" class="external-link">dbAppendTable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"passwd"</span>, <span class="va">sample_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
+<span>  <span class="op">~</span><span class="va">user_name</span>, <span class="op">~</span><span class="va">pwhash</span>, <span class="op">~</span><span class="va">uid</span>, <span class="op">~</span><span class="va">gid</span>, <span class="op">~</span><span class="va">real_name</span>, <span class="op">~</span><span class="va">home_phone</span>, <span class="op">~</span><span class="va">home_dir</span>, <span class="op">~</span><span class="va">shell</span>,</span>
+<span>  <span class="st">'admin'</span>,<span class="st">'xxx'</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="st">'Admin'</span>,<span class="st">'111-222-3333'</span>,<span class="st">'/root'</span>,<span class="st">'/bin/dash'</span>,</span>
+<span>  <span class="st">'bob'</span>,<span class="st">'xxx'</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="st">'Bob'</span>,<span class="st">'123-456-7890'</span>,<span class="st">'/home/bob'</span>,<span class="st">'/bin/zsh'</span>,</span>
+<span>  <span class="st">'alice'</span>,<span class="st">'xxx'</span>,<span class="fl">2</span>,<span class="fl">1</span>,<span class="st">'Alice'</span>,<span class="st">'098-765-4321'</span>,<span class="st">'/home/alice'</span>,<span class="st">'/bin/zsh'</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Append rows to the <code>passwd</code> table</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">rows_append</span><span class="op">(</span></span>
+<span>  <span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"passwd"</span><span class="op">)</span>,</span>
+<span>  <span class="fu">copy_inline</span><span class="op">(</span><span class="va">con</span>, <span class="va">sample_data</span><span class="op">)</span>,</span>
+<span>  in_place <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Check that the data is in the table</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"passwd"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Source:   table&lt;"passwd"&gt; [3 x 8]</span></span>
+<span><span class="co">#&gt; # Database: postgres  [schambe3@/tmp:5432/schambe3]</span></span>
+<span><span class="co">#&gt;   user_name pwhash   uid   gid real_name home_phone   home_dir    shell    </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;    </span></span>
+<span><span class="co">#&gt; 1 admin     xxx        0     0 Admin     111-222-3333 /root       /bin/dash</span></span>
+<span><span class="co">#&gt; 2 bob       xxx        1     1 Bob       123-456-7890 /home/bob   /bin/zsh </span></span>
+<span><span class="co">#&gt; 3 alice     xxx        2     1 Alice     098-765-4321 /home/alice /bin/zsh</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="create-roles">Create roles<a class="anchor" aria-label="anchor" href="#create-roles"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Administrator</span></span>
 <span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"CREATE ROLE admin"</span><span class="op">)</span></span>
 <span><span class="co"># Normal user</span></span>
@@ -122,10 +153,10 @@ expected.</p>
 <h2 id="enable-row-level-security">Enable row level security<a class="anchor" aria-label="anchor" href="#enable-row-level-security"></a>
 </h2>
 <p>Enable row level security with <code>rls_enable</code></p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rls_enable.html">rls_enable</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"passwd"</span><span class="op">)</span></span></code></pre></div>
 <p>Then check that it worked with <code>rls_check_status</code></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/rls_check_status.html">rls_check_status</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"passwd"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
 <span><span class="co">#&gt;   relname relrowsecurity relforcerowsecurity</span></span>
@@ -137,20 +168,20 @@ expected.</p>
 </h2>
 <p><code>admin_all</code> = Administrator can see all rows and add any
 rows</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">policy1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rls_construct_policy.html">rls_construct_policy</a></span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="st">"admin_all"</span>,</span>
-<span>  on <span class="op">=</span> <span class="st">"passwd"</span>,</span>
-<span>  to <span class="op">=</span> <span class="st">"admin"</span>,</span>
+<span>  table <span class="op">=</span> <span class="st">"passwd"</span>,</span>
+<span>  role <span class="op">=</span> <span class="st">"admin"</span>,</span>
 <span>  using <span class="op">=</span> <span class="st">"(true)"</span>,</span>
-<span>  with <span class="op">=</span> <span class="st">"(true)"</span></span>
+<span>  check <span class="op">=</span> <span class="st">"(true)"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;rls_policy&gt;</span></span>
 <span><span class="co">#&gt;   policy name: admin_all</span></span>
-<span><span class="co">#&gt;   on: passwd</span></span>
-<span><span class="co">#&gt;   to: admin</span></span>
+<span><span class="co">#&gt;   table: passwd</span></span>
+<span><span class="co">#&gt;   role: admin</span></span>
 <span><span class="co">#&gt;   using: (true)</span></span>
-<span><span class="co">#&gt;   with: (true)</span></span>
+<span><span class="co">#&gt;   check: (true)</span></span>
 <span><span class="fu"><a href="../reference/rls_create_policy.html">rls_create_policy</a></span><span class="op">(</span><span class="va">con</span>, <span class="va">policy1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/rls_policies.html">rls_policies</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 1 × 8</span></span>
@@ -158,17 +189,17 @@ rows</p>
 <span><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;      &lt;pq__name&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;     </span></span>
 <span><span class="co">#&gt; 1 public     passwd    admin_all  PERMISSIVE {admin}    ALL   true  true</span></span></code></pre></div>
 <p><code>all_view</code> = Normal users can view all rows</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">policy2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rls_construct_policy.html">rls_construct_policy</a></span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="st">"all_view"</span>,</span>
-<span>  on <span class="op">=</span> <span class="st">"passwd"</span>,</span>
-<span>  for_ <span class="op">=</span> <span class="st">"SELECT"</span>,</span>
+<span>  table <span class="op">=</span> <span class="st">"passwd"</span>,</span>
+<span>  command <span class="op">=</span> <span class="st">"SELECT"</span>,</span>
 <span>  using <span class="op">=</span> <span class="st">"(true)"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;rls_policy&gt;</span></span>
 <span><span class="co">#&gt;   policy name: all_view</span></span>
-<span><span class="co">#&gt;   on: passwd</span></span>
-<span><span class="co">#&gt;   for: SELECT</span></span>
+<span><span class="co">#&gt;   table: passwd</span></span>
+<span><span class="co">#&gt;   command: SELECT</span></span>
 <span><span class="co">#&gt;   using: (true)</span></span>
 <span><span class="fu"><a href="../reference/rls_create_policy.html">rls_create_policy</a></span><span class="op">(</span><span class="va">con</span>, <span class="va">policy2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/rls_policies.html">rls_policies</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span>
@@ -179,23 +210,23 @@ rows</p>
 <span><span class="co">#&gt; 2 public     passwd    all_view   PERMISSIVE {public}   SELECT true  &lt;NA&gt;</span></span></code></pre></div>
 <p><code>user_mod</code> = Normal users can update their own records,
 but limit which shells a normal user is allowed to set</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">policy3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rls_construct_policy.html">rls_construct_policy</a></span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="st">"user_mod"</span>,</span>
-<span>  on <span class="op">=</span> <span class="st">"passwd"</span>,</span>
-<span>  for_ <span class="op">=</span> <span class="st">"UPDATE"</span>,</span>
+<span>  table <span class="op">=</span> <span class="st">"passwd"</span>,</span>
+<span>  command <span class="op">=</span> <span class="st">"UPDATE"</span>,</span>
 <span>  using <span class="op">=</span> <span class="st">"(current_user = user_name)"</span>,</span>
-<span>  with <span class="op">=</span> <span class="st">"(</span></span>
+<span>  check <span class="op">=</span> <span class="st">"(</span></span>
 <span><span class="st">    current_user = user_name AND</span></span>
 <span><span class="st">    shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')</span></span>
 <span><span class="st">  )"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;rls_policy&gt;</span></span>
 <span><span class="co">#&gt;   policy name: user_mod</span></span>
-<span><span class="co">#&gt;   on: passwd</span></span>
-<span><span class="co">#&gt;   for: UPDATE</span></span>
+<span><span class="co">#&gt;   table: passwd</span></span>
+<span><span class="co">#&gt;   command: UPDATE</span></span>
 <span><span class="co">#&gt;   using: (current_user = user_name)</span></span>
-<span><span class="co">#&gt;   with: (</span></span>
+<span><span class="co">#&gt;   check: (</span></span>
 <span><span class="co">#&gt;     current_user = user_name AND</span></span>
 <span><span class="co">#&gt;     shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')</span></span>
 <span><span class="co">#&gt;   )</span></span>
@@ -212,64 +243,86 @@ but limit which shells a normal user is allowed to set</p>
 <h2 id="grant-permissions">Grant permissions<a class="anchor" aria-label="anchor" href="#grant-permissions"></a>
 </h2>
 <p>Allow admin all normal rights</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"GRANT SELECT, INSERT, UPDATE, DELETE ON passwd TO admin"</span><span class="op">)</span></span></code></pre></div>
 <p>Users only get select access on public columns</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"GRANT SELECT</span></span>
-<span><span class="st">  (user_name, uid, gid, real_name, home_phone, extra_info, home_dir, shell)</span></span>
+<span><span class="st">  (user_name, uid, gid, real_name, home_phone, home_dir, shell)</span></span>
 <span><span class="st">  ON passwd TO public"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Allow users to update certain columns</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"GRANT UPDATE</span></span>
-<span><span class="st">  (pwhash, real_name, home_phone, extra_info, shell)</span></span>
+<span><span class="st">  (pwhash, real_name, home_phone, shell)</span></span>
 <span><span class="st">  ON passwd TO public"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="ensure-the-system-behaves-as-expected">Ensure the system behaves as expected<a class="anchor" aria-label="anchor" href="#ensure-the-system-behaves-as-expected"></a>
 </h2>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>Admin can access all columns</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SET SESSION AUTHORIZATION admin"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT * from passwd"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   user_name pwhash uid gid real_name   home_phone extra_info    home_dir</span></span>
-<span><span class="co">#&gt; 1     admin    xxx   0   0     Admin 111-222-3333       &lt;NA&gt;       /root</span></span>
-<span><span class="co">#&gt; 2       bob    xxx   1   1       Bob 123-456-7890       &lt;NA&gt;   /home/bob</span></span>
-<span><span class="co">#&gt; 3     alice    xxx   2   1     Alice 098-765-4321       &lt;NA&gt; /home/alice</span></span>
-<span><span class="co">#&gt;       shell</span></span>
-<span><span class="co">#&gt; 1 /bin/dash</span></span>
-<span><span class="co">#&gt; 2  /bin/zsh</span></span>
-<span><span class="co">#&gt; 3  /bin/zsh</span></span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<span><span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"passwd"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Source:   table&lt;"passwd"&gt; [3 x 8]</span></span>
+<span><span class="co">#&gt; # Database: postgres  [schambe3@/tmp:5432/schambe3]</span></span>
+<span><span class="co">#&gt;   user_name pwhash   uid   gid real_name home_phone   home_dir    shell    </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;    </span></span>
+<span><span class="co">#&gt; 1 admin     xxx        0     0 Admin     111-222-3333 /root       /bin/dash</span></span>
+<span><span class="co">#&gt; 2 bob       xxx        1     1 Bob       123-456-7890 /home/bob   /bin/zsh </span></span>
+<span><span class="co">#&gt; 3 alice     xxx        2     1 Alice     098-765-4321 /home/alice /bin/zsh</span></span></code></pre></div>
+<p>Alice can NOT access all columns</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SET SESSION AUTHORIZATION alice"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT * from passwd"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Failed to fetch row : ERROR:  permission denied for table passwd</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"SELECT user_name,real_name,home_phone,extra_info,home_dir,shell FROM passwd"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   user_name real_name   home_phone extra_info    home_dir     shell</span></span>
-<span><span class="co">#&gt; 1     admin     Admin 111-222-3333       &lt;NA&gt;       /root /bin/dash</span></span>
-<span><span class="co">#&gt; 2       bob       Bob 123-456-7890       &lt;NA&gt;   /home/bob  /bin/zsh</span></span>
-<span><span class="co">#&gt; 3     alice     Alice 098-765-4321       &lt;NA&gt; /home/alice  /bin/zsh</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<span><span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="st">"passwd"</span><span class="op">)</span> <span class="co"># "passwd" here means "SELECT * from passwd"</span></span>
+<span><span class="co">#&gt; Error in `db_query_fields.DBIConnection()`:</span></span>
+<span><span class="co">#&gt; ! Can't query fields.</span></span>
+<span><span class="co">#&gt; ℹ Using SQL: SELECT * FROM "passwd" AS "q01" WHERE (0 = 1)</span></span>
+<span><span class="co">#&gt; Caused by error:</span></span>
+<span><span class="co">#&gt; ! Failed to fetch row : ERROR:  permission denied for table passwd</span></span></code></pre></div>
+<p>Alice can access all columns except for <code>pwhash</code></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sql1</span> <span class="op">&lt;-</span> <span class="fu">sql</span><span class="op">(</span><span class="st">"SELECT user_name,real_name,home_phone,home_dir,shell FROM passwd"</span><span class="op">)</span></span>
+<span><span class="fu">tbl</span><span class="op">(</span><span class="va">con</span>, <span class="va">sql1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Source:   SQL [3 x 5]</span></span>
+<span><span class="co">#&gt; # Database: postgres  [schambe3@/tmp:5432/schambe3]</span></span>
+<span><span class="co">#&gt;   user_name real_name home_phone   home_dir    shell    </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;    </span></span>
+<span><span class="co">#&gt; 1 admin     Admin     111-222-3333 /root       /bin/dash</span></span>
+<span><span class="co">#&gt; 2 bob       Bob       123-456-7890 /home/bob   /bin/zsh </span></span>
+<span><span class="co">#&gt; 3 alice     Alice     098-765-4321 /home/alice /bin/zsh</span></span></code></pre></div>
+<p>Alice can not do UPDATE operations on certain columns (in this case
+<code>user_name</code>)</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"UPDATE passwd SET user_name = 'joe'"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: Failed to fetch row : ERROR:  permission denied for table passwd</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p>Alice can however update <code>real_name</code></p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"UPDATE passwd SET real_name = 'Alice Doe'"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1</span></span>
-<span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"UPDATE passwd SET real_name = 'John Doe' WHERE user_name = 'admin'"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"UPDATE passwd SET shell = '/bin/xx'"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: Failed to fetch row : ERROR:  new row violates row-level security policy for table "passwd"</span></span>
-<span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"DELETE from passwd"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
+<p>She can update <code>real_name</code>, but the update doesn’t alter
+any rows when it has a WHERE clause on <code>user_name</code></p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"UPDATE passwd SET real_name = 'John Doe' WHERE user_name = 'admin'"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+<p>Alice can not update the <code>shell</code> column to an invalid
+value as defined by our row-level security policy above</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"UPDATE passwd SET shell = '/bin/xx'"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: Failed to fetch row : ERROR:  new row violates row-level security policy for table "passwd"</span></span></code></pre></div>
+<p>Alice can not delete the <code>passwd</code> table and can not do any
+insert operations</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"DELETE from passwd"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: Failed to fetch row : ERROR:  permission denied for table passwd</span></span>
 <span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"INSERT INTO passwd (user_name) VALUES ('xxx')"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error: Failed to fetch row : ERROR:  permission denied for table passwd</span></span></code></pre></div>
 <p>Alice can change her own password; RLS silently prevents updating
 other rows</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbExecute.html" class="external-link">dbExecute</a></span><span class="op">(</span><span class="va">con</span>, <span class="st">"UPDATE passwd SET pwhash = 'abc'"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1</span></span></code></pre></div>
 </div>
