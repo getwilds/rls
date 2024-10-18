@@ -1,6 +1,6 @@
 Package: rls
 Title: Row Level Security
-Version: 0.0.1.91
+Version: 0.0.1.94
 Authors@R: c(
     person("Scott", "Chamberlain", role = c("aut", "cre"),
         email = "sachamber@fredhutch.org",

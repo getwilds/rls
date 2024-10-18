@@ -38,7 +38,7 @@ rls_drop_policy <- function(con, policy = NULL, name = NULL, table = NULL) {
   )
   if (!is.null(policy)) {
     name <- policy$name
-    table <- policy$on
+    table <- policy$table
   } else {
     if (is.null(name) && is.null(table)) {
       rlang::abort("if `policy` is NULL, name & table must be non-NULL")

@@ -28,7 +28,7 @@ dbCreateTable(con, "sometable", mtcars)
 
 policy1 <- rls_construct_policy(
   name = "hide_confidential",
-  on = "sometable",
+  table = "sometable",
   using = "(true)"
 )
 policy1
@@ -37,8 +37,8 @@ rls_policies(con)
 
 policy2 <- rls_construct_policy(
   name = "policy_concerts",
-  on = "sometable",
-  for_ = "SELECT",
+  table = "sometable",
+  command = "SELECT",
   using = "(true)"
 )
 policy2
@@ -48,6 +48,7 @@ rls_policies(con)
 # cleanup
 rls_drop_policy(con, policy1)
 rls_drop_policy(con, policy2)
+dbExecute(con, "DROP table sometable")
 dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

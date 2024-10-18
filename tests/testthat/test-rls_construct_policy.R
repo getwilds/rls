@@ -1,8 +1,8 @@
 test_that("rls_construct_policy", {
   x <- rls_construct_policy(
     name = "hide_confidential",
-    on = "sometable",
-    with = "confidential BOOLEAN",
+    table = "sometable",
+    check = "confidential BOOLEAN",
     using = "confidential = false"
   )
   expect_s3_class(x, "rls_policy")

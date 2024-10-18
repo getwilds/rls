@@ -5,7 +5,7 @@ test_that("rls_create_policy", {
 
     policy1 <- rls_construct_policy(
       name = "hide_confidential",
-      on = "mtcars",
+      table = "mtcars",
       using = "(true)"
     )
     x <- rls_create_policy(con, policy1)

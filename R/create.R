@@ -14,7 +14,7 @@
 #'
 #' policy1 <- rls_construct_policy(
 #'   name = "hide_confidential",
-#'   on = "sometable",
+#'   table = "sometable",
 #'   using = "(true)"
 #' )
 #' policy1
@@ -23,8 +23,8 @@
 #'
 #' policy2 <- rls_construct_policy(
 #'   name = "policy_concerts",
-#'   on = "sometable",
-#'   for_ = "SELECT",
+#'   table = "sometable",
+#'   command = "SELECT",
 #'   using = "(true)"
 #' )
 #' policy2
@@ -34,6 +34,7 @@
 #' # cleanup
 #' rls_drop_policy(con, policy1)
 #' rls_drop_policy(con, policy2)
+#' dbExecute(con, "DROP table sometable")
 #' dbDisconnect(con)
 rls_create_policy <- function(con, policy) {
   is_conn(con)
@@ -42,11 +43,11 @@ rls_create_policy <- function(con, policy) {
     PqConnection = "CREATE"
   )
   sql_create_policy <- glue("
-    {create_statement} POLICY {policy$name} ON {policy$on}
-    {combine_if('FOR', policy$for_)}
-    {combine_if('TO', policy$to)}
+    {create_statement} POLICY {policy$name} ON {policy$table}
+    {combine_if('FOR', policy$command)}
+    {combine_if('TO', policy$role)}
     {combine_if('USING', policy$using)}
-    {combine_if('WITH CHECK', policy$with)}
+    {combine_if('WITH CHECK', policy$check)}
   ")
   sql_create_policy <- gsub("\n\\s+\n", "\n", sql_create_policy)
   invisible(dbExecute(con, sql_create_policy))

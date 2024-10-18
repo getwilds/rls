@@ -6,31 +6,41 @@
 \usage{
 rls_construct_policy(
   name,
-  on,
+  table,
   as = NULL,
-  for_ = NULL,
-  to = NULL,
+  command = NULL,
+  role = NULL,
   using = NULL,
-  with = NULL
+  check = NULL
 )
 }
 \arguments{
-\item{name}{(character) the policy name. required}
+\item{name}{(character) name of the policy to be created. This must be
+distinct from the name of any other policy for the table. required}
 
-\item{on}{(character) the table to apply the policy to. required}
+\item{table}{(character) the table to apply the policy to. required}
 
 \item{as}{(character) permissive (default) or restrictive.
 permissive combines with "OR" while restrictive combines with "AND"}
 
-\item{for_}{(character) permissive (default) or restrictive.}
+\item{command}{(character) the command to which the policy applies. Valid
+options are ALL (default), SELECT, INSERT, UPDATE, and DELETE}
 
-\item{to}{(character) The role(s) to which the policy is to be applied.
+\item{role}{(character) The role(s) to which the policy is to be applied.
 The default is PUBLIC, which will apply the policy to all roles.}
 
 \item{using}{(character) Specifies a filter that is applied to the WHERE
-clause of a query}
+clause of a query. Rows for which the expression returns true will be
+visible. Any rows for which the expression returns false or null will
+not be visible to the user (in a SELECT), and will not be available
+for modification (in an UPDATE or DELETE). Such rows are silently
+suppressed; no error is reported.}
 
-\item{with}{(character) the check condition}
+\item{check}{(character) the check condition; any SQL conditional expression
+that returns a boolean. This expression will be used in INSERT and UPDATE
+queries against the table if row-level security is enabled. Only rows
+for which the expression evaluates to true will be allowed. Is evaluated
+against the proposed new contents of the row, not the original contents}
 }
 \value{
 s3 object of class \code{rls_policy}
@@ -38,11 +48,22 @@ s3 object of class \code{rls_policy}
 \description{
 Construct a row level security policy
 }
+\details{
+We've chosen more intuitive names for policy parameters, so here's
+a mapping of function parameters to the PostgreSQL parameters:
+\itemize{
+\item (this function: PostgreSQL)
+\item table: on
+\item command: for
+\item role: to
+\item check: with
+}
+}
 \examples{
 x <- rls_construct_policy(
   name = "hide_confidential",
-  on = "sometable",
-  with = "confidential BOOLEAN",
+  table = "sometable",
+  check = "confidential BOOLEAN",
   using = "confidential = false"
 )
 x
