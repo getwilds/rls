@@ -6,5 +6,6 @@
 #' @importFrom DBI dbExecute dbGetQuery
 #' @importFrom RPostgres Postgres
 #' @importFrom tibble as_tibble
+#' @importFrom dplyr %>%
 ## usethis namespace: end
 NULL

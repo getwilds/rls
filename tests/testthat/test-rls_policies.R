@@ -15,7 +15,7 @@ test_that("rls_policies", {
     expect_s3_class(policies, "tbl")
     expect_equal(NROW(policies), 1)
     expect_equal(policies$tablename, "attitude")
-    expect_equal(policies$permissive, "PERMISSIVE")
+    expect_equal(unique(policies$permissive), "PERMISSIVE")
 
     # cleanup
     rls_drop_policy(con, my_policy)
