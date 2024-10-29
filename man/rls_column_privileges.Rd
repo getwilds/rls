@@ -22,7 +22,7 @@ a tbl with \code{column_name} and \code{privilege_type}
 Column level privileges
 }
 \examples{
-\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(RPostgres)
 con <- dbConnect(Postgres())
 dbExecute(con, "GRANT SELECT

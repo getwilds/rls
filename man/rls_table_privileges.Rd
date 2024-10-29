@@ -21,7 +21,7 @@ each of the main commands: select, insert, update, delete
 Table level privileges
 }
 \examples{
-\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(RPostgres)
 con <- dbConnect(Postgres())
 rls_table_privileges(con, "passwd")

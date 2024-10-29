@@ -20,7 +20,7 @@ a \code{tbl}
 tbl variant for rls
 }
 \examples{
-\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(RPostgres)
 con <- dbConnect(Postgres())
 dbExecute(con, "SET SESSION AUTHORIZATION aliceuser")

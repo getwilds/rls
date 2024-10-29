@@ -18,7 +18,7 @@ rls_permissions <- function() {
 #' @export
 #' @param con a postgres or redshift connection object
 #' @return the current user, scalar
-#' @examplesIf has_postgres()
+#' @examplesIf interactive() && has_postgres()
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
 #' rls_current_user(con)
@@ -36,7 +36,7 @@ rls_current_user <- function(con) {
 #' @param ... args passed on to [dplyr::tbl()]
 #' @autoglobal
 #' @return a `tbl`
-#' @examplesIf has_postgres()
+#' @examplesIf interactive() && has_postgres()
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
 #' dbExecute(con, "SET SESSION AUTHORIZATION aliceuser")
@@ -62,7 +62,7 @@ rls_tbl <- function(con, from, ...) {
 #' @param user_role (character) a user or role name
 #' @param schema (character) a schema
 #' @return a tbl with `column_name` and `privilege_type`
-#' @examplesIf has_postgres()
+#' @examplesIf interactive() && has_postgres()
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
 #' dbExecute(con, "GRANT SELECT
@@ -94,7 +94,7 @@ rls_column_privileges <- function(con, table, user_role, schema = "public") {
 #' @inheritParams rls_column_privileges
 #' @return a tbl with whether user or role has privileges on a table for
 #' each of the main commands: select, insert, update, delete
-#' @examplesIf has_postgres()
+#' @examplesIf interactive() && has_postgres()
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
 #' rls_table_privileges(con, "passwd")
@@ -119,7 +119,7 @@ rls_table_privileges <- function(con, table, schema = "public") {
 #' @autoglobal
 #' @global %like%
 #' @return a `tbl`
-#' @examplesIf has_postgres()
+#' @examplesIf interactive() && has_postgres()
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
 #' rls_list_roles(con)
@@ -140,7 +140,7 @@ rls_list_roles <- function(con) {
 #' @section Permissions:
 #' - view: select
 #' - edit: update, insert, delete
-#' @examplesIf has_postgres() && rlang::is_installed("dbplyr")
+#' @examplesIf interactive() && has_postgres() && rlang::is_installed("dbplyr")
 #' library(RPostgres)
 #' library(dbplyr)
 #' con <- dbConnect(Postgres())

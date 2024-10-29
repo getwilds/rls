@@ -16,7 +16,7 @@ the current user, scalar
 Get the current user
 }
 \examples{
-\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(RPostgres)
 con <- dbConnect(Postgres())
 rls_current_user(con)

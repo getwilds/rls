@@ -25,7 +25,7 @@ Column policies
 }
 
 \examples{
-\dontshow{if (has_postgres() && rlang::is_installed("dbplyr")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() && has_postgres() && rlang::is_installed("dbplyr")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(RPostgres)
 library(dbplyr)
 con <- dbConnect(Postgres())
