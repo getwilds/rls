@@ -12,7 +12,7 @@ Row level security helpers. Currenlty supports PostgreSQL and Redshift flavored 
 Useful links:
 \itemize{
   \item \url{https://github.com/getwilds/rls}
-  \item \url{http://getwilds.org/rls}
+  \item \url{https://getwilds.org/rls}
   \item Report bugs at \url{https://github.com/getwilds/rls/issues}
 }
 
