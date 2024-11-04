@@ -19,20 +19,7 @@ library(tibble)
 library(DBI)
 library(RPostgres)
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 library(dbplyr)
-#> 
-#> Attaching package: 'dbplyr'
-#> The following objects are masked from 'package:dplyr':
-#> 
-#>     ident, sql
 library(rls)
 ```
 

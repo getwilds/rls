@@ -18,7 +18,7 @@ Row Level Security for PostgreSQL and AWS Redshift.
 
 The following is a walk-through of using row level security in PostgreSQL, including checks to make sure policies behave as expected.
 
-```{r setup}
+```{r setup, message=FALSE, warning=FALSE}
 library(tibble)
 library(DBI)
 library(RPostgres)
