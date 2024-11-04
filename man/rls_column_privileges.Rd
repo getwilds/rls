@@ -4,14 +4,15 @@
 \alias{rls_column_privileges}
 \title{Column level privileges}
 \usage{
-rls_column_privileges(con, table, user_role, schema = "public")
+rls_column_privileges(con, table, user_role = NULL, schema = "public")
 }
 \arguments{
 \item{con}{a postgres or redshift connection object}
 
 \item{table}{(character) a table name}
 
-\item{user_role}{(character) a user or role name}
+\item{user_role}{(character) a user or role name. default: \code{NULL}.
+if \code{NULL}, all users/roles returned}
 
 \item{schema}{(character) a schema}
 }
@@ -30,5 +31,6 @@ dbExecute(con, "GRANT SELECT
    ON passwd TO aliceuser"
  )
 rls_column_privileges(con, "passwd", "aliceuser")
+rls_column_privileges(con, "passwd")
 \dontshow{\}) # examplesIf}
 }

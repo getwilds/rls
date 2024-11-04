@@ -59,7 +59,8 @@ rls_tbl <- function(con, from, ...) {
 #' @export
 #' @param con a postgres or redshift connection object
 #' @param table (character) a table name
-#' @param user_role (character) a user or role name
+#' @param user_role (character) a user or role name. default: `NULL`.
+#' if `NULL`, all users/roles returned
 #' @param schema (character) a schema
 #' @return a tbl with `column_name` and `privilege_type`
 #' @examplesIf interactive() && has_postgres()
@@ -70,7 +71,14 @@ rls_tbl <- function(con, from, ...) {
 #'    ON passwd TO aliceuser"
 #'  )
 #' rls_column_privileges(con, "passwd", "aliceuser")
-rls_column_privileges <- function(con, table, user_role, schema = "public") {
+#' rls_column_privileges(con, "passwd")
+rls_column_privileges <- function(con, table, user_role = NULL,
+	schema = "public") {
+
+	userrole <- ""
+	if (!rlang::is_null(user_role)) {
+		userrole <- glue("p.grantee = '{user_role}' AND")
+	}
 	as_tibble(dbGetQuery(con, glue("
 		SELECT
 			c.column_name,
@@ -82,7 +90,7 @@ rls_column_privileges <- function(con, table, user_role, schema = "public") {
 		ON
 			p.table_name = c.table_name AND p.column_name = c.column_name
 		WHERE
-			p.grantee = '{user_role}' AND
+			{userrole}
 			c.table_name = '{table}' AND
 			c.table_schema = '{schema}';
 	")))
@@ -109,6 +117,45 @@ rls_table_privileges <- function(con, table, schema = "public") {
 			FROM pg_tables a, pg_user b
 			WHERE a.schemaname = '{schema}' AND a.tablename='{table}'
 	")))
+}
+
+#' Overview of privileges and policies
+#'
+#' @export
+#' @inheritParams rls_column_privileges
+#' @details *Privileges* are broken down into two categories:
+#' - **Table**: Some privileges can only be thought about at the table level,
+#' e.g., truncate can only be applied to an entire table, not a column
+#' - **Column**: Column level priveleges specify access to
+#'
+#' Then there's **Row** level *policies*, which as the name says apply to
+#' specific rows only
+#'
+#' Both table and column level privileges use the SQL command `GRANT`,
+#' while row level policies use a separate command `CREATE POLICY`.
+#' Row level policies have specific names to them - whereas table and
+#' column level privileges do not have names.
+#' @section Running examples:
+#' First run the code in [passwd], then run the below code
+#' @examplesIf interactive() && has_postgres()
+#' library(RPostgres)
+#' con <- dbConnect(Postgres())
+#' rls_privileges(con, "passwd")
+#' rls_privileges(con, "passwd", "aliceuser")
+#'
+#' policy1 <- rls_construct_policy(
+#'   name = "stuff",
+#'   table = "passwd",
+#'   using = "(true)"
+#' )
+#' rls_create_policy(con, policy1)
+#' rls_privileges(con, "passwd")
+rls_privileges <- function(con, table, user_role = NULL, schema = "public") {
+	list(
+		table = rls_table_privileges(con, table, schema),
+		column = rls_column_privileges(con, table, user_role, schema),
+		row = rls_policies(con)
+	)
 }
 
 #' List roles
