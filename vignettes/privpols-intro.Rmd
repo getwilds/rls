@@ -1,0 +1,54 @@
+---
+title: "Privileges and policies basics"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Privileges and policies basics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+In PostgreSQL and Redshift there are two aspects to security on tables we're concerned with in this package:
+
+1. Privileges (<https://www.postgresql.org/docs/current/ddl-priv.html>) - applied to whole tables and columns
+2. Row security policies (<https://www.postgresql.org/docs/current/ddl-rowsecurity.html>) - applied to rows
+
+## Privileges
+
+The creator of a table is typically the owner, and the only one with access to modify it. For other users/roles to have access they must be granted _privileges_.
+
+There are different kinds of privileges in PostgreSQL, but here we're only concerned with table and column level privileges. They are:
+
+| Privilege  | Object type   |
+| ---------- | ------------- |
+| SELECT     | table, column |
+| INSERT     | table, column |
+| UPDATE     | table, column |
+| REFERENCES | table, column |
+| DELETE     | table         |
+| TRUNCATE   | table         |
+| TRIGGER    | table         |
+| MAINTAIN   | table         |
+
+To assign privileges the `GRANT` command is used. To remove a previously-granted privilege use the `REVOKE` command.
+
+There are two special strings that are important to know about:
+
+- `ALL`: Use this in place of a privilege (e.g., `SELECT`) to grant all privileges relevant for the object type (e.g., table).
+- `PUBLIC`: This is a special role that exists by default. It can be used to grant a privilege to every role in the system.
+
+Note that tables and columns within tables do not have privileges granted to `PUBLIC` by default - they have to be granted.
+
+TODO: add links to fxns in the package to do this stuff ...
+
+## Row security policies
+
+Please do read the documentation on row security policies linked above - it's not that long and a must read to use row security policies.
+
+Next we'll highlight particularly important aspects of row security (quoted where taken verbatim from the PostgreSQL docs):
+
+- Without any row security policies, a user that has access privileges has access to all rows within that table
+- "When row security is enabled on a table" (see `rls_enable()`), "all normal access to the table for selecting rows or modifying rows must be allowed by a row security policy. However, the table's owner is typically not subject to row security policies. If no policy exists for the table, a default-deny policy is used, meaning that no rows are visible or can be modified. Operations that apply to the whole table, such as TRUNCATE and REFERENCES, are not subject to row security."
+- "Row security policies can be specific to commands, or to roles, or to both"
+- "Enabling and disabling row security, as well as adding policies to a table, is always the privilege of the table owner only"
+
+TODO: add links to fxns in the package to do this stuff ...

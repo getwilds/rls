@@ -1,3 +1,47 @@
 url: https://getwilds.org/rls
 template:
   bootstrap: 5
+reference:
+  - title: rls
+    desc: >
+      High level overview of package
+    contents:
+      - rls
+  - title: Introspect your database
+    contents:
+      - rls_current_user
+      - rls_list_roles
+  - title: Row level security
+    contents:
+      - rls_check_status
+      - rls_construct_policy
+      - rls_create_policy
+      - rls_drop_policy
+      - rls_disable
+      - rls_enable
+      - rls_policies
+  - title: Fetch privileges and row level security policies
+    contents:
+      - rls_column_privileges
+      - rls_privileges
+      - rls_table_privileges
+  - title: Utilities
+    contents:
+      - has_postgres
+  - title: Example code/data
+    contents:
+      - passwd
+  - title: Experimental, will change
+    contents:
+      - grant
+      - "on"
+      - user
+      - translate_privilege
+      - rls_col_policy
+      - rls_permissions
+      - rls_tbl
+
+
+
+
+
