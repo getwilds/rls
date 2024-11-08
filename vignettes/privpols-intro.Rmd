@@ -23,11 +23,7 @@ There are different kinds of privileges in PostgreSQL, but here we're only conce
 | SELECT     | table, column |
 | INSERT     | table, column |
 | UPDATE     | table, column |
-| REFERENCES | table, column |
 | DELETE     | table         |
-| TRUNCATE   | table         |
-| TRIGGER    | table         |
-| MAINTAIN   | table         |
 
 To assign privileges the `GRANT` command is used. To remove a previously-granted privilege use the `REVOKE` command.
 
