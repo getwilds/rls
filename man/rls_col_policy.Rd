@@ -31,8 +31,8 @@ library(dbplyr)
 con <- dbConnect(Postgres())
 rls_tbl(con, "passwd") \%>\% rls_col_policy(role = "public", permissions = "view")
 df <- rls_tbl(con, "passwd") \%>\% dplyr::collect()
-dbplyr::lazy_frame(df) \%>\% 
-  rls_col_policy(role = "public", permissions = "view") \%>\% 
+dbplyr::lazy_frame(df) \%>\%
+  rls_col_policy(role = "public", permissions = "view") \%>\%
   attr(., "policies_columns")
 \dontshow{\}) # examplesIf}
 }

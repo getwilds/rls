@@ -22,7 +22,9 @@ Imports:
     rlang,
     RPostgres,
     tibble,
-    dbplyr
+    dbplyr,
+    cli,
+    magrittr
 Suggests: 
     knitr,
     rmarkdown,

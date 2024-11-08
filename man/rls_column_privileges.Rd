@@ -28,8 +28,7 @@ library(RPostgres)
 con <- dbConnect(Postgres())
 dbExecute(con, "GRANT SELECT
    (user_name, uid, gid, real_name, home_phone, home_dir, shell)
-   ON passwd TO aliceuser"
- )
+   ON passwd TO aliceuser")
 rls_column_privileges(con, "passwd", "aliceuser")
 rls_column_privileges(con, "passwd")
 \dontshow{\}) # examplesIf}

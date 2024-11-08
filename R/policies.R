@@ -1,20 +1,20 @@
 #' RLS persmissions
-#' 
+#'
 #' Applies to column and row level policies
-#' 
+#'
 #' @export
 #' @return list of length 2 with slots for `view`, `edit`
 #' @examples
 #' rls_permissions()
 rls_permissions <- function() {
-	list(
-		view = "select",
-		edit = c("update", "insert", "delete")
-	)
+  list(
+    view = "select",
+    edit = c("update", "insert", "delete")
+  )
 }
 
-#' Get the current user 
-#' 
+#' Get the current user
+#'
 #' @export
 #' @param con a postgres or redshift connection object
 #' @return the current user, scalar
@@ -23,7 +23,7 @@ rls_permissions <- function() {
 #' con <- dbConnect(Postgres())
 #' rls_current_user(con)
 rls_current_user <- function(con) {
-	dbGetQuery(con, "select current_user")$current_user
+  dbGetQuery(con, "select current_user")$current_user
 }
 
 #' tbl variant for rls
@@ -44,18 +44,20 @@ rls_current_user <- function(con) {
 #' dbExecute(con, "SET SESSION AUTHORIZATION schambe3")
 #' rls_tbl(con, "passwd")
 rls_tbl <- function(con, from, ...) {
-	privs <- rls_column_privileges(con, from, rls_current_user(con))
-	sql_custom <- if (NROW(privs) == 0) {
-		sql(glue("SELECT * FROM {from}"))
-	} else {
-		privs <- dplyr::filter(privs, privilege_type == "SELECT")
-		sql(sprintf("SELECT %s FROM %s", paste(privs$column_name, collapse = ", "), from))
-	}
-	tbl(con, sql_custom, ...)
+  privs <- rls_column_privileges(con, from, rls_current_user(con))
+  sql_custom <- if (NROW(privs) == 0) {
+    sql(glue("SELECT * FROM {from}"))
+  } else {
+    privs <- dplyr::filter(privs, privilege_type == "SELECT")
+    sql(sprintf("SELECT %s FROM %s", paste(privs$column_name, collapse = ", "), from))
+  }
+  our_tbl <- tbl(con, sql_custom, ...)
+  attr(our_tbl, "table") <- from
+  our_tbl
 }
 
 #' Column level privileges
-#' 
+#'
 #' @export
 #' @param con a postgres or redshift connection object
 #' @param table (character) a table name
@@ -68,18 +70,16 @@ rls_tbl <- function(con, from, ...) {
 #' con <- dbConnect(Postgres())
 #' dbExecute(con, "GRANT SELECT
 #'    (user_name, uid, gid, real_name, home_phone, home_dir, shell)
-#'    ON passwd TO aliceuser"
-#'  )
+#'    ON passwd TO aliceuser")
 #' rls_column_privileges(con, "passwd", "aliceuser")
 #' rls_column_privileges(con, "passwd")
 rls_column_privileges <- function(con, table, user_role = NULL,
-	schema = "public") {
-
-	userrole <- ""
-	if (!rlang::is_null(user_role)) {
-		userrole <- glue("p.grantee = '{user_role}' AND")
-	}
-	as_tibble(dbGetQuery(con, glue("
+                                  schema = "public") {
+  userrole <- ""
+  if (!rlang::is_null(user_role)) {
+    userrole <- glue("p.grantee = '{user_role}' AND")
+  }
+  as_tibble(dbGetQuery(con, glue("
 		SELECT
 			c.column_name,
 			p.privilege_type
@@ -97,7 +97,7 @@ rls_column_privileges <- function(con, table, user_role = NULL,
 }
 
 #' Table level privileges
-#' 
+#'
 #' @export
 #' @inheritParams rls_column_privileges
 #' @return a tbl with whether user or role has privileges on a table for
@@ -108,7 +108,7 @@ rls_column_privileges <- function(con, table, user_role = NULL,
 #' rls_table_privileges(con, "passwd")
 #' rls_table_privileges(con, "orange")
 rls_table_privileges <- function(con, table, schema = "public") {
-	as_tibble(dbGetQuery(con, glue("
+  as_tibble(dbGetQuery(con, glue("
 		SELECT a.schemaname, a.tablename, b.usename,
 		  HAS_TABLE_PRIVILEGE(usename, quote_ident(schemaname) || '.' || quote_ident(tablename), 'select') as select,
 		  HAS_TABLE_PRIVILEGE(usename, quote_ident(schemaname) || '.' || quote_ident(tablename), 'insert') as insert,
@@ -151,15 +151,15 @@ rls_table_privileges <- function(con, table, schema = "public") {
 #' rls_create_policy(con, policy1)
 #' rls_privileges(con, "passwd")
 rls_privileges <- function(con, table, user_role = NULL, schema = "public") {
-	list(
-		table = rls_table_privileges(con, table, schema),
-		column = rls_column_privileges(con, table, user_role, schema),
-		row = rls_policies(con)
-	)
+  list(
+    table = rls_table_privileges(con, table, schema),
+    column = rls_column_privileges(con, table, user_role, schema),
+    row = rls_policies(con)
+  )
 }
 
 #' List roles
-#' 
+#'
 #' @import dbplyr
 #' @export
 #' @param con a postgres or redshift connection object
@@ -171,15 +171,15 @@ rls_privileges <- function(con, table, user_role = NULL, schema = "public") {
 #' con <- dbConnect(Postgres())
 #' rls_list_roles(con)
 rls_list_roles <- function(con) {
-	tbl(con, "pg_roles") %>%
-		filter(
-			rolname != "postgres",
-			!rolname %like% "pg_%"
-		)
+  tbl(con, "pg_roles") %>%
+    filter(
+      rolname != "postgres",
+      !rolname %like% "pg_%"
+    )
 }
 
 #' Column policies
-#' 
+#'
 #' @export
 #' @param .data lazy_frame or data.frame or tbl, etc.
 #' @param role (character) the role name
@@ -193,10 +193,10 @@ rls_list_roles <- function(con) {
 #' con <- dbConnect(Postgres())
 #' rls_tbl(con, "passwd") %>% rls_col_policy(role = "public", permissions = "view")
 #' df <- rls_tbl(con, "passwd") %>% dplyr::collect()
-#' dbplyr::lazy_frame(df) %>% 
-#'   rls_col_policy(role = "public", permissions = "view") %>% 
+#' dbplyr::lazy_frame(df) %>%
+#'   rls_col_policy(role = "public", permissions = "view") %>%
 #'   attr(., "policies_columns")
 rls_col_policy <- function(.data, role = NULL, permissions = NULL) {
-	attr(.data, "policies_columns") <- list(role = role, permissions = permissions)
-	.data
+  attr(.data, "policies_columns") <- list(role = role, permissions = permissions)
+  .data
 }
