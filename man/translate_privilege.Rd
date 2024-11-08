@@ -32,7 +32,7 @@ dbExecute(con, "CREATE ROLE jane")
 #  ON fruits
 #  TO jane
 priv <-
- rls_tbl(con, "fruits") \%>\%
+  rls_tbl(con, "fruits") \%>\%
   grant(select) \%>\%
   to(jane)
 translate_privilege(priv, con)
@@ -41,7 +41,7 @@ translate_privilege(priv, con)
 #  ON fruits
 #  FROM jane
 priv <-
- rls_tbl(con, "fruits") \%>\%
+  rls_tbl(con, "fruits") \%>\%
   revoke(select) \%>\%
   from(jane)
 translate_privilege(priv, con)
@@ -51,7 +51,7 @@ translate_privilege(priv, con)
 #  ON fruits
 #  TO jane
 priv <-
- rls_tbl(con, "fruits") \%>\%
+  rls_tbl(con, "fruits") \%>\%
   grant(select, cols = c("apples", "strawberries")) \%>\%
   to(jane)
 sql <- translate_privilege(priv, con)

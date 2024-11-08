@@ -29,9 +29,9 @@ invisible(dbExecute(con, "
 # Some sample data
 sample_data <- tribble(
   ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~home_dir, ~shell,
-  'admin','xxx',0,0,'Admin','111-222-3333','/root','/bin/dash',
-  'bob','xxx',1,1,'Bob','123-456-7890','/home/bob','/bin/zsh',
-  'alice','xxx',2,1,'Alice','098-765-4321','/home/alice','/bin/zsh'
+  "admin", "xxx", 0, 0, "Admin", "111-222-3333", "/root", "/bin/dash",
+  "bob", "xxx", 1, 1, "Bob", "123-456-7890", "/home/bob", "/bin/zsh",
+  "alice", "xxx", 2, 1, "Alice", "098-765-4321", "/home/alice", "/bin/zsh"
 )
 
 # Append rows to the `passwd` table
