@@ -103,7 +103,7 @@ from <- to
 #' #  ON fruits
 #' #  TO jane
 #' priv <-
-#'  rls_tbl(con, "fruits") %>%
+#'   rls_tbl(con, "fruits") %>%
 #'   grant(select) %>%
 #'   to(jane)
 #' translate_privilege(priv, con)
@@ -112,7 +112,7 @@ from <- to
 #' #  ON fruits
 #' #  FROM jane
 #' priv <-
-#'  rls_tbl(con, "fruits") %>%
+#'   rls_tbl(con, "fruits") %>%
 #'   revoke(select) %>%
 #'   from(jane)
 #' translate_privilege(priv, con)
@@ -122,7 +122,7 @@ from <- to
 #' #  ON fruits
 #' #  TO jane
 #' priv <-
-#'  rls_tbl(con, "fruits") %>%
+#'   rls_tbl(con, "fruits") %>%
 #'   grant(select, cols = c("apples", "strawberries")) %>%
 #'   to(jane)
 #' sql <- translate_privilege(priv, con)
@@ -136,13 +136,15 @@ translate_privilege <- function(priv, con) {
 
   table_cols <- collapse(lapply(priv$privilege, \(w) {
     cols <- collapse(w$cols)
-    sprintf("%s %s",
+    sprintf(
+      "%s %s",
       collapse(w$commands),
       ifelse(is_really_empty(cols), "", glue("({cols})"))
     )
   }))
 
-  query <- sprintf(template,
+  query <- sprintf(
+    template,
     table_cols,
     attr(priv$data, "table"),
     priv$user

@@ -26,7 +26,7 @@ print.privilege <- function(x, ...) {
   if (!is_really_empty(x$privilege)) {
     cat_me("type", x$type)
     for (i in x$privilege) {
-      cat_me(x=i$commands, y=i$cols %|||% "<all cols>", indent = "    ")
+      cat_me(x = i$commands, y = i$cols %|||% "<all cols>", indent = "    ")
     }
   }
   print(x$data)
