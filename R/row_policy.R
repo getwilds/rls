@@ -4,10 +4,15 @@
 #' @inheritParams grant
 #' @param name (character) scalar name for the policy. required
 #' @examplesIf interactive() && has_postgres()
+#' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
 #' rls_tbl(con, "passwd") %>%
-#'   row_policy("my_policy")
+#'   row_policy("my_policy") %>%
+#'   rls_run()
 row_policy <- function(.data, name) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   assert_is(name, "character")
@@ -22,8 +27,12 @@ row_policy <- function(.data, name) {
 #' @export
 #' @inheritParams grant
 #' @examplesIf interactive() && has_postgres()
+#' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
 #' rls_tbl(con, "passwd") %>%
 #'   row_policy("my_policy") %>%
 #'   commands(update)
@@ -42,8 +51,12 @@ commands <- function(.data, ...) {
 #' @param sql (character) sql syntax to use for existing rows
 #' @details Use either `using` or `sql`, not both
 #' @examplesIf interactive() && has_postgres()
+#' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
 #' rls_tbl(con, "passwd") %>%
 #'   row_policy("my_policy") %>%
 #'   commands(update) %>%
@@ -72,8 +85,12 @@ rows_existing <- function(.data, using = NULL, sql = NULL) {
 #' @param sql (character) sql syntax to use for new rows
 #' @details Use either `check` or `sql`, not both
 #' @examplesIf interactive() && has_postgres()
+#' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
 #'
 #' rls_tbl(con, "passwd") %>%
 #'   row_policy("a_policy") %>%
@@ -102,11 +119,22 @@ rows_new <- function(.data, check = NULL, sql = NULL) {
   .data
 }
 
+#' @keywords internal
 as_con <- function(x) {
-  assert_is(x, "row_policy")
-  x$data$src$con
+  UseMethod("as_con")
+}
+#' @export
+as_con.row_policy <- function(x) {
+  return(x$data$src$con)
+}
+#' @export
+as_con.PqConnection <- function(x) {
+  return(x)
 }
 
+#' @note param `fun` takes a function, by default uses a function
+#' that simply returns whatever is passed in to it
+#' @noRd
 combine_if <- function(statement, item, fun = \(x) x) {
   ifelse(!rlang::is_null(item), paste(statement, fun(item)), "")
 }

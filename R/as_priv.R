@@ -1,6 +1,7 @@
 #' As privilege
 #' @param x some input
 #' @export
+#' @return an object of S3 class "privilege"
 as_priv <- function(x) {
   UseMethod("as_priv")
 }

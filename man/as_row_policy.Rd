@@ -9,6 +9,9 @@ as_row_policy(x)
 \arguments{
 \item{x}{some input}
 }
+\value{
+an object of S3 class "row_policy"
+}
 \description{
 As row policy
 }

@@ -1,6 +1,7 @@
 #' As row policy
 #' @param x some input
 #' @export
+#' @return an object of S3 class "row_policy"
 as_row_policy <- function(x) {
   UseMethod("as_row_policy")
 }

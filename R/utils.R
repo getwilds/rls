@@ -1,6 +1,8 @@
 is_conn <- function(con) {
-  stopifnot(!inherits(con, "DBIConnection") ==
-    "con must be of class DBIConnection")
+  stopifnot(
+    "con must be of class DBIConnection" =
+    inherits(con, "DBIConnection")
+  )
 }
 
 compact <- function(x) {

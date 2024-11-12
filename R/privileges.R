@@ -5,8 +5,12 @@
 #' @param ... one of all, select, update, insert, delete
 #' @param cols (character) vector of column names
 #' @examplesIf interactive() && has_postgres()
+#' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
 #'
 #' rls_tbl(con, "passwd") %>%
 #'   grant(update) %>%
@@ -37,8 +41,12 @@ grant <- function(.data, ..., cols = NULL) {
 #' @export
 #' @inheritParams grant
 #' @examplesIf interactive() && has_postgres()
+#' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
 #'
 #' rls_tbl(con, "passwd") %>%
 #'   revoke(update) %>%
@@ -66,8 +74,13 @@ revoke <- function(.data, ..., cols = NULL) {
 #' @param .data a `privilege` object
 #' @param ... (character) one or more user (or role) names
 #' @examplesIf interactive() && has_postgres()
+#' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
+#'
 #' rls_tbl(con, "passwd") %>% to(jane)
 #' rls_tbl(con, "passwd") %>% to(jane, bob, alice)
 to <- function(.data, ...) {
@@ -132,8 +145,6 @@ from <- to
 #' dbExecute(con, sql)
 translate_privilege <- function(priv, con) {
   assert_is(priv, "privilege")
-  # stopifnot("Can not use grant and revoke" =
-  #   xor(!is_empty(priv$grant), !is_empty(priv$revoke)))
 
   template <- priv_templates[[priv$type]]
 
@@ -160,21 +171,6 @@ priv_templates <- list(
   grant = "GRANT %s ON %s TO %s",
   revoke = "REVOKE %s ON %s FROM %s"
 )
-
-#' Run a query
-#'
-#' @export
-#' @param query an s3 object of class `privilege` or `row_policy, required
-#' @param con DBI connection object, required
-rls_run <- function(con, query) {
-  is_conn(con)
-  assert_is(query, c("privilege", "row_policy"))
-  sql <- switch(class(query),
-    privilege = translate_privilege(query, con),
-    row_policy = translate_row_policy(query, con)
-  )
-  dbExecute(con, sql)
-}
 
 rls_grant <- function(commands, cols) {
   x <- list(commands = commands, cols = cols)

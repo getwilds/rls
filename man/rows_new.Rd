@@ -22,8 +22,12 @@ Use either \code{check} or \code{sql}, not both
 }
 \examples{
 \dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
+if (!dbExistsTable(con, "passwd")) {
+   setup_example_table(con, "passwd")
+}
 
 rls_tbl(con, "passwd") \%>\%
   row_policy("a_policy") \%>\%

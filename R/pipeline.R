@@ -73,7 +73,13 @@ pipe_autoexec <- function(toggle) {
   info <- pipeline_info()
 
   if (isTRUE(info[["is_piped"]])) {
-    rls_exit <- function(x) if (inherits(x, c("privilege", "row_policy"))) rls_run(x$data$src$con, x) else x
+    rls_exit <- function(x) {
+      if (inherits(x, c("privilege", "row_policy"))) {
+        rls_run(x, x$data$src$con)
+      } else {
+        x
+      }
+    }
     pipeline_on_exit(info$env)
     info$env$.rls_exitfun <- if (toggle) rls_exit else identity
   }

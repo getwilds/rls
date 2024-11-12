@@ -9,6 +9,9 @@ as_priv(x)
 \arguments{
 \item{x}{some input}
 }
+\value{
+an object of S3 class "privilege"
+}
 \description{
 As privilege
 }
