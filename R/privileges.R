@@ -72,7 +72,10 @@ revoke <- function(.data, ..., cols = NULL) {
 #' rls_tbl(con, "passwd") %>% to(jane, bob, alice)
 to <- function(.data, ...) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
-  .data <- as_priv(.data)
+  .data <- switch(class(.data),
+    privilege = as_priv(.data),
+    row_policy = as_row_policy(.data)
+  )
   .data$user <- dot_names(...)
   .data
 }
@@ -161,9 +164,24 @@ priv_templates <- list(
 #' Run a query
 #'
 #' @export
-#' @param priv an s3 object of class `privilege`, required
+#' @param query an s3 object of class `privilege` or `row_policy, required
 #' @param con DBI connection object, required
-rls_run <- function(con, priv) {
-  sql <- translate_privilege(priv, con)
+rls_run <- function(con, query) {
+  is_conn(con)
+  assert_is(query, c("privilege", "row_policy"))
+  sql <- switch(class(query),
+    privilege = translate_privilege(query, con),
+    row_policy = translate_row_policy(query, con)
+  )
   dbExecute(con, sql)
+}
+
+rls_grant <- function(commands, cols) {
+  x <- list(commands = commands, cols = cols)
+  structure(x, class = "rls_grant")
+}
+
+rls_revoke <- function(commands, cols) {
+  x <- list(commands = commands, cols = cols)
+  structure(x, class = "rls_revoke")
 }

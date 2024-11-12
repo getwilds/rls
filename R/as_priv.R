@@ -36,12 +36,3 @@ cat_me <- function(x, y, indent = "  ") {
   y <- paste0(y, collapse = ", ")
   cat_line(glue("{indent}{x}: {y}", .trim = FALSE))
 }
-
-rls_grant <- function(commands, cols) {
-  x <- list(commands = commands, cols = cols)
-  structure(x, class = "rls_grant")
-}
-rls_revoke <- function(commands, cols) {
-  x <- list(commands = commands, cols = cols)
-  structure(x, class = "rls_revoke")
-}

@@ -4,12 +4,12 @@
 \alias{rls_run}
 \title{Run a query}
 \usage{
-rls_run(con, priv)
+rls_run(con, query)
 }
 \arguments{
 \item{con}{DBI connection object, required}
 
-\item{priv}{an s3 object of class \code{privilege}, required}
+\item{query}{an s3 object of class \code{privilege} or `row_policy, required}
 }
 \description{
 Run a query

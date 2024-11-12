@@ -1,5 +1,11 @@
 test_that("rls_policies", {
   with_database_connection({
+    # first, drop any existing tables
+    tables <- DBI::dbListTables(con)
+    if (length(tables)) {
+      invisible(lapply(tables, \(x) DBI::dbRemoveTable(con, x)))
+    }
+
     DBI::dbWriteTable(con, "attitude", attitude, temporary = TRUE)
     on.exit(DBI::dbRemoveTable(con, "attitude"), add = TRUE)
 

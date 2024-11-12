@@ -28,6 +28,15 @@ assert_is <- function(x, y, arg = caller_arg(x)) {
   }
 }
 
+#' @importFrom rlang is_scalar_character
+assert_scalar <- function(x, arg = caller_arg(x)) {
+  if (!is_scalar_character(x)) {
+    rls_abort(
+      format_error("{.arg {arg}} must be scalar")
+    )
+  }
+}
+
 #' @importFrom rlang has_length
 assert_len <- function(x, y, arg = caller_arg(x)) {
   if (!has_length(x, y)) {

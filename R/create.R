@@ -44,16 +44,16 @@ rls_create_policy <- function(con, policy) {
   )
   sql_create_policy <- glue("
     {create_statement} POLICY {policy$name} ON {policy$table}
-    {combine_if('FOR', policy$command)}
-    {combine_if('TO', policy$role)}
-    {combine_if('USING', policy$using)}
-    {combine_if('WITH CHECK', policy$check)}
+    {combine_if_old('FOR', policy$command)}
+    {combine_if_old('TO', policy$role)}
+    {combine_if_old('USING', policy$using)}
+    {combine_if_old('WITH CHECK', policy$check)}
   ")
   sql_create_policy <- gsub("\n\\s+\n", "\n", sql_create_policy)
   invisible(dbExecute(con, sql_create_policy))
 }
 
 # {ifelse(!is.null(policy$for_), paste('FOR', policy$for_), '')}
-combine_if <- function(statement, item) {
+combine_if_old <- function(statement, item) {
   ifelse(!is.null(item), paste(statement, item), "")
 }

@@ -7,6 +7,6 @@
 #' @importFrom RPostgres Postgres
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr %>%
-#' @importFrom rlang as_name enquo enquos is_character
+#' @importFrom rlang as_name enquo enquos is_character quo_is_null
 ## usethis namespace: end
 NULL
