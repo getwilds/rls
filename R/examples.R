@@ -2,11 +2,15 @@
 #'
 #' @name passwd
 #' @examplesIf interactive() && has_postgres()
+#' library(RPostgres)
+#' library(dplyr)
+#' library(dbplyr)
+#' library(tibble)
+#'
 #' con <- dbConnect(Postgres())
-#' user <- dbGetQuery(con, "select current_user")$current_user
+#'
 #' # Create a table
 #' ## Create the table (with no data)
-#'
 #' invisible(dbExecute(con, "
 #'   CREATE TABLE passwd (
 #'   user_name             text UNIQUE NOT NULL,
@@ -20,7 +24,7 @@
 #' );
 #' "))
 #'
-#' # Some sample data
+#' ## The data
 #' sample_data <- tribble(
 #'   ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~home_dir, ~shell,
 #'   "admin", "xxx", 0, 0, "Admin", "111-222-3333", "/root", "/bin/dash",
@@ -28,13 +32,13 @@
 #'   "alice", "xxx", 2, 1, "Alice", "098-765-4321", "/home/alice", "/bin/zsh"
 #' )
 #'
-#' # Append rows to the `passwd` table
+#' ## Append rows to the `passwd` table
 #' rows_append(
 #'   tbl(con, "passwd"),
 #'   copy_inline(con, sample_data),
 #'   in_place = TRUE
 #' )
 #'
-#' # Check that the data is in the table
+#' ## Check that the data is in the table
 #' tbl(con, "passwd")
 NULL

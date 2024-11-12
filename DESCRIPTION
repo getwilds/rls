@@ -18,12 +18,12 @@ RoxygenNote: 7.3.2
 Imports: 
     DBI,
     dplyr,
-    glue,
-    rlang,
+    dbplyr,
     RPostgres,
     tibble,
-    dbplyr,
+    glue,
     cli,
+    rlang,
     magrittr
 Suggests: 
     knitr,
