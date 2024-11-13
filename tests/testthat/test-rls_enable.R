@@ -1,6 +1,7 @@
 test_that("rls_enable", {
   with_database_connection({
-    DBI::dbWriteTable(con, "beaver2", beaver2, temporary = TRUE)
+    DBI::dbWriteTable(con, "beaver2", beaver2,
+      overwrite = TRUE, temporary = TRUE)
     on.exit(DBI::dbRemoveTable(con, "beaver2"), add = TRUE)
 
     enabled <- rls_enable(con, table = "beaver2")

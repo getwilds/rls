@@ -1,6 +1,7 @@
 test_that("rls_create_policy", {
   with_database_connection({
-    DBI::dbWriteTable(con, "mtcars", mtcars, temporary = TRUE)
+    DBI::dbWriteTable(con, "mtcars", mtcars,
+      overwrite = TRUE, temporary = TRUE)
     on.exit(DBI::dbRemoveTable(con, "mtcars"), add = TRUE)
 
     policy1 <- rls_construct_policy(

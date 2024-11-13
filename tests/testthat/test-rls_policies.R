@@ -6,7 +6,8 @@ test_that("rls_policies", {
       invisible(lapply(tables, \(x) DBI::dbRemoveTable(con, x)))
     }
 
-    DBI::dbWriteTable(con, "attitude", attitude, temporary = TRUE)
+    DBI::dbWriteTable(con, "attitude", attitude,
+      overwrite = TRUE, temporary = TRUE)
     on.exit(DBI::dbRemoveTable(con, "attitude"), add = TRUE)
 
     my_policy <- rls_construct_policy(
