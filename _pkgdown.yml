@@ -17,9 +17,25 @@ reference:
       - rls_construct_policy
       - rls_create_policy
       - rls_drop_policy
+      - rls_policy_exists
       - rls_disable
       - rls_enable
       - rls_policies
+      - as_row_policy
+      - commands
+      - row_policy
+      - rows_existing
+      - rows_new
+  - title: Privileges (aka column level security)
+    contents:
+      - as_priv
+      - revoke
+      - grant
+      - to
+      - from
+  - title: Run column or row security queries
+    contents:
+      - rls_run
   - title: Fetch privileges and row level security policies
     contents:
       - rls_column_privileges
@@ -28,20 +44,12 @@ reference:
   - title: Utilities
     contents:
       - has_postgres
+      - auto_pipe
   - title: Example code/data
     contents:
       - passwd
-  - title: Experimental, will change
+  - title: Experimental, may change
     contents:
-      - grant
-      - "on"
-      - user
-      - translate_privilege
       - rls_col_policy
       - rls_permissions
       - rls_tbl
-
-
-
-
-
