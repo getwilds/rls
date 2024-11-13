@@ -128,6 +128,10 @@ as_con.row_policy <- function(x) {
   return(x$data$src$con)
 }
 #' @export
+as_con.privilege <- function(x) {
+  return(x$data$src$con)
+}
+#' @export
 as_con.PqConnection <- function(x) {
   return(x)
 }
