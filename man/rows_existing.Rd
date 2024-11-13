@@ -28,7 +28,7 @@ if (!dbExistsTable(con, "passwd")) {
    setup_example_table(con, "passwd")
 }
 rls_tbl(con, "passwd") \%>\%
-  row_policy("my_policy") \%>\%
+  row_policy("a_good_policy") \%>\%
   commands(update) \%>\%
   rows_existing(sql = 'current_user = "user_name"')
 \dontshow{\}) # examplesIf}

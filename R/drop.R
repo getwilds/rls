@@ -40,8 +40,8 @@ rls_drop_policy <- function(con, policy = NULL, name = NULL, table = NULL) {
     name <- policy$name
     table <- policy$table
   } else {
-    if (is.null(name) && is.null(table)) {
-      rlang::abort("if `policy` is NULL, name & table must be non-NULL")
+    if (is.null(name) || is.null(table)) {
+      rlang::abort("if `policy` is NULL, `name` & `table` must be non-NULL")
     }
   }
   invisible(dbExecute(con, glue("{drop_statement} POLICY {name} ON {table}")))

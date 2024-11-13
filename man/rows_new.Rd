@@ -37,7 +37,7 @@ rls_tbl(con, "passwd") \%>\%
   to(jane)
 
 rls_tbl(con, "passwd") \%>\%
-  row_policy("my_policy") \%>\%
+  row_policy("that_policy") \%>\%
   commands(update) \%>\%
   rows_existing(sql = 'current_user = "user_name"') \%>\%
   rows_new(home_phone == "098-765-4321") \%>\%

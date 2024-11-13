@@ -9,3 +9,14 @@ with_database_connection <- function(expr, con = RPostgres::postgresDefault()) {
   context <- list2env(list(con = con), parent = parent.frame())
   eval(substitute(expr), envir = context)
 }
+
+drop_all_rls_policies <- function(con) {
+  pols <- rls_policies(con)
+  if (NROW(pols) == 0) return()
+  for (i in seq_len(NROW(pols))) {
+    rls_drop_policy(con,
+      name = pols$policyname[i],
+      table = pols$tablename[i]
+    )
+  }
+}

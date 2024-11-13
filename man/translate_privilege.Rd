@@ -7,7 +7,7 @@
 translate_privilege(priv, con)
 }
 \arguments{
-\item{priv}{an object of class \code{privilege}, required}
+\item{priv}{an S3 object of class \code{privilege}, required}
 
 \item{con}{DBI connection object, required}
 }
@@ -15,7 +15,7 @@ translate_privilege(priv, con)
 Translate privilege
 }
 \examples{
-\dontshow{if (interactive() && rlang::is_installed("dbplyr")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(tibble)
 library(RPostgres)
 library(DBI)
@@ -25,16 +25,18 @@ dat <- tibble(
   apples = c("pink lady", "cortland", "mcintosh"),
   strawberries = c("alice", "albion", "alaska pioneer")
 )
-DBI::dbWriteTable(con, "fruits", dat)
+dbWriteTable(con, "fruits", dat)
 dbExecute(con, "CREATE ROLE jane")
+auto_pipe(FALSE)
 
 # GRANT SELECT
 #  ON fruits
 #  TO jane
 priv <-
-  rls_tbl(con, "fruits") \%>\%
+  rls_tbl(con, "flights") \%>\%
   grant(select) \%>\%
   to(jane)
+priv
 translate_privilege(priv, con)
 
 # REVOKE SELECT
@@ -44,6 +46,7 @@ priv <-
   rls_tbl(con, "fruits") \%>\%
   revoke(select) \%>\%
   from(jane)
+priv
 translate_privilege(priv, con)
 
 # GRANT SELECT
@@ -54,7 +57,9 @@ priv <-
   rls_tbl(con, "fruits") \%>\%
   grant(select, cols = c("apples", "strawberries")) \%>\%
   to(jane)
+priv
 sql <- translate_privilege(priv, con)
 dbExecute(con, sql)
 \dontshow{\}) # examplesIf}
 }
+\keyword{internal}

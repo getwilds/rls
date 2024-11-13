@@ -34,7 +34,7 @@ row_policy <- function(.data, name) {
 #'    setup_example_table(con, "passwd")
 #' }
 #' rls_tbl(con, "passwd") %>%
-#'   row_policy("my_policy") %>%
+#'   row_policy("their_policy") %>%
 #'   commands(update)
 commands <- function(.data, ...) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
@@ -58,7 +58,7 @@ commands <- function(.data, ...) {
 #'    setup_example_table(con, "passwd")
 #' }
 #' rls_tbl(con, "passwd") %>%
-#'   row_policy("my_policy") %>%
+#'   row_policy("a_good_policy") %>%
 #'   commands(update) %>%
 #'   rows_existing(sql = 'current_user = "user_name"')
 rows_existing <- function(.data, using = NULL, sql = NULL) {
@@ -100,7 +100,7 @@ rows_existing <- function(.data, using = NULL, sql = NULL) {
 #'   to(jane)
 #'
 #' rls_tbl(con, "passwd") %>%
-#'   row_policy("my_policy") %>%
+#'   row_policy("that_policy") %>%
 #'   commands(update) %>%
 #'   rows_existing(sql = 'current_user = "user_name"') %>%
 #'   rows_new(home_phone == "098-765-4321") %>%
@@ -147,6 +147,32 @@ express <- function(x) {
   glue("({ifelse(x == 'TRUE', tolower(x), x)})")
 }
 
+#' Translate row policy
+#'
+#' @export
+#' @keywords internal
+#' @param policy an S3 object of class `row_policy`, required
+#' @param con DBI connection object, required
+#' @examplesIf interactive()
+#' library(RPostgres)
+#' library(DBI)
+#' con <- dbConnect(Postgres())
+#' setup_example_table(con)
+#'
+#' if (rls_policy_exists(con, "blue_policy")) {
+#'   rls_drop_policy(con, name = "blue_policy", table = "passwd")
+#' }
+#'
+#' policy <- rls_tbl(con, "passwd") %>%
+#'   row_policy(name = "blue_policy") %>%
+#'   commands(update) %>%
+#'   rows_existing(TRUE) %>%
+#'   rows_new(TRUE) %>%
+#'   to(jane)
+#' policy
+#' sql <- translate_row_policy(policy, con)
+#' sql
+#' dbExecute(con, sql)
 translate_row_policy <- function(policy, con) {
   is_conn(con)
   create_statement <- switch(class(con),

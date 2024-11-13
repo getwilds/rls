@@ -100,9 +100,10 @@ from <- to
 #' Translate privilege
 #'
 #' @export
-#' @param priv an object of class `privilege`, required
+#' @keywords internal
+#' @param priv an S3 object of class `privilege`, required
 #' @param con DBI connection object, required
-#' @examplesIf interactive() && rlang::is_installed("dbplyr")
+#' @examplesIf interactive()
 #' library(tibble)
 #' library(RPostgres)
 #' library(DBI)
@@ -112,16 +113,18 @@ from <- to
 #'   apples = c("pink lady", "cortland", "mcintosh"),
 #'   strawberries = c("alice", "albion", "alaska pioneer")
 #' )
-#' DBI::dbWriteTable(con, "fruits", dat)
+#' dbWriteTable(con, "fruits", dat)
 #' dbExecute(con, "CREATE ROLE jane")
+#' auto_pipe(FALSE)
 #'
 #' # GRANT SELECT
 #' #  ON fruits
 #' #  TO jane
 #' priv <-
-#'   rls_tbl(con, "fruits") %>%
+#'   rls_tbl(con, "flights") %>%
 #'   grant(select) %>%
 #'   to(jane)
+#' priv
 #' translate_privilege(priv, con)
 #'
 #' # REVOKE SELECT
@@ -131,6 +134,7 @@ from <- to
 #'   rls_tbl(con, "fruits") %>%
 #'   revoke(select) %>%
 #'   from(jane)
+#' priv
 #' translate_privilege(priv, con)
 #'
 #' # GRANT SELECT
@@ -141,10 +145,12 @@ from <- to
 #'   rls_tbl(con, "fruits") %>%
 #'   grant(select, cols = c("apples", "strawberries")) %>%
 #'   to(jane)
+#' priv
 #' sql <- translate_privilege(priv, con)
 #' dbExecute(con, sql)
 translate_privilege <- function(priv, con) {
   assert_is(priv, "privilege")
+  is_conn(con)
 
   template <- priv_templates[[priv$type]]
 
