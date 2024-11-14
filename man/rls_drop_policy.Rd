@@ -12,7 +12,8 @@ rls_drop_policies(con)
 \arguments{
 \item{con}{a DBI database connection object}
 
-\item{policy}{(list) a policy derived from \code{\link[=rls_construct_policy]{rls_construct_policy()}}}
+\item{policy}{(list) a policy derived from running \code{\link[=row_policy]{row_policy()}} and
+friends}
 
 \item{name}{(character) a policy name. optional}
 

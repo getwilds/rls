@@ -153,6 +153,7 @@ express <- function(x) {
 #' @keywords internal
 #' @param policy an S3 object of class `row_policy`, required
 #' @param con DBI connection object, required
+#' @references <https://www.postgresql.org/docs/current/sql-createpolicy.html>
 #' @examplesIf interactive()
 #' library(RPostgres)
 #' library(DBI)

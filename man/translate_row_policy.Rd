@@ -37,4 +37,7 @@ sql
 dbExecute(con, sql)
 \dontshow{\}) # examplesIf}
 }
+\references{
+\url{https://www.postgresql.org/docs/current/sql-createpolicy.html}
+}
 \keyword{internal}

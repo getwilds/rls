@@ -3,7 +3,9 @@
 #' @export
 #' @importFrom glue glue
 #' @importFrom DBI dbExecute
-#' @inheritParams rls_create_policy
+#' @param con a DBI database connection object
+#' @param policy (list) a policy derived from running [row_policy()] and
+#' friends
 #' @param name (character) a policy name. optional
 #' @param table (character) a table name. optional
 #' @details If `policy` is supplied, `name` and `table` are not required. If
