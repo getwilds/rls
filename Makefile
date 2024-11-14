@@ -24,6 +24,10 @@ check: build
 	@rm -f `ls -1tr ${PACKAGE}*gz | tail -n1`
 	@rm -rf ${PACKAGE}.Rcheck
 
+clean:
+	@rm -f `ls -1tr ${PACKAGE}*gz | tail -n1`
+	@rm -rf ${PACKAGE}.Rcheck
+
 test:
 	${RSCRIPT} -e "devtools::test()"
 
