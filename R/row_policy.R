@@ -119,23 +119,6 @@ rows_new <- function(.data, check = NULL, sql = NULL) {
   .data
 }
 
-#' @keywords internal
-as_con <- function(x) {
-  UseMethod("as_con")
-}
-#' @export
-as_con.row_policy <- function(x) {
-  return(x$data$src$con)
-}
-#' @export
-as_con.privilege <- function(x) {
-  return(x$data$src$con)
-}
-#' @export
-as_con.PqConnection <- function(x) {
-  return(x)
-}
-
 #' @note param `fun` takes a function, by default uses a function
 #' that simply returns whatever is passed in to it
 #' @noRd
