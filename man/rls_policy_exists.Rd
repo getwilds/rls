@@ -23,7 +23,9 @@ Check if a row level security policy exists
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
-dbWriteTable(con, "attitude", attitude)
+dbWriteTable(con, "attitude", attitude, overwrite = TRUE)
+dbExecute(con, "DROP ROLE IF EXISTS jane")
+dbExecute(con, "CREATE ROLE jane")
 policy <- rls_tbl(con, "attitude") \%>\%
   row_policy(name = "some_policy") \%>\%
   commands(update) \%>\% 
@@ -36,6 +38,7 @@ rls_policy_exists(con, "some_policy")
 rls_drop_policy(con, name = "some_policy", table = "attitude")
 rls_policy_exists(con, "some_policy")
 dbRemoveTable(con, "attitude")
+dbExecute(con, "DROP ROLE jane")
 dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

@@ -12,15 +12,14 @@
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
-#' dbWriteTable(con, "attitude", attitude, temporary = TRUE)
-#' my_policy <- rls_construct_policy(
-#'   name = "all_view",
-#'   table = "attitude",
-#'   command = "SELECT",
-#'   using = "(true)"
-#' )
-#' rls_create_policy(con, my_policy)
+#' dbWriteTable(con, "attitude", attitude, overwrite = TRUE)
+#' rls_tbl(con, "attitude") %>%
+#'   row_policy("all_view") %>%
+#'   commands(select) %>%
+#'   rows_existing(TRUE) %>%
+#'   rls_run()
 #' rls_policies(con)
+#' rls_drop_policies(con)
 #' dbRemoveTable(con, "attitude")
 #' dbDisconnect(con)
 rls_policies <- function(con) {

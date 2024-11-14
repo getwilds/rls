@@ -2,9 +2,12 @@
 % Please edit documentation in R/drop.R
 \name{rls_drop_policy}
 \alias{rls_drop_policy}
-\title{Drop a row level security policy}
+\alias{rls_drop_policies}
+\title{Drop row level security policies}
 \usage{
 rls_drop_policy(con, policy = NULL, name = NULL, table = NULL)
+
+rls_drop_policies(con)
 }
 \arguments{
 \item{con}{a DBI database connection object}
@@ -16,35 +19,43 @@ rls_drop_policy(con, policy = NULL, name = NULL, table = NULL)
 \item{table}{(character) a table name. optional}
 }
 \value{
-a scalar numeric that specifies the number of rows affected
-by the statement, invisibly
+For \code{rls_drop_policy}, a scalar numeric that specifies the number
+of rows affected by the statement, invisibly. For \code{rls_drop_policies},
+return \code{NULL} invisibly
 }
 \description{
-Drop a row level security policy
+Drop row level security policies
 }
 \details{
 If \code{policy} is supplied, \code{name} and \code{table} are not required. If
 \code{policy} is not supplied, \code{name} and \code{table} need to be supplied.
+
+\code{rls_drop_policy} drops a single policy, and \code{rls_drop_policies}
+drops all policies in the database defined by the \code{con}
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
 
-dbCreateTable(con, "atable", mtcars)
+dbWriteTable(con, "atable", mtcars, overwrite = TRUE)
 
-policy1 <- rls_construct_policy(
-  name = "hide_confidential",
-  on = "atable",
-  using = "(true)"
-)
-policy1
-rls_create_policy(con, policy1)
+policy1 <- rls_tbl(con, "atable") \%>\%
+  row_policy("hide_confidential") \%>\%
+  rows_existing(TRUE)
+rls_run(policy1)
+
 rls_policies(con)
 rls_drop_policy(con, policy1)
 rls_policies(con)
 
+rls_run(policy1)
+rls_policies(con)
+rls_drop_policies(con)
+rls_policies(con)
+
+dbRemoveTable(con, "atable")
 dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
