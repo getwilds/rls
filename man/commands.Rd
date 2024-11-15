@@ -15,7 +15,7 @@ commands(.data, ...)
 Commands
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
@@ -25,5 +25,8 @@ if (!dbExistsTable(con, "passwd")) {
 rls_tbl(con, "passwd") \%>\%
   row_policy("their_policy") \%>\%
   commands(update)
+
+# cleanup
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

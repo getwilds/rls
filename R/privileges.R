@@ -4,7 +4,7 @@
 #' @param .data an s3 object of class `privilege`
 #' @param ... one of all, select, update, insert, delete
 #' @param cols (character) vector of column names
-#' @examplesIf interactive() && has_postgres()
+#' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
@@ -23,6 +23,9 @@
 #' rls_tbl(con, "passwd") %>%
 #'   grant(update, select, cols = c("real_name", "home_phone")) %>%
 #'   to(jane)
+#' 
+#' # cleanup
+#' dbDisconnect(con)
 grant <- function(.data, ..., cols = NULL) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   .data <- as_priv(.data)
@@ -40,7 +43,7 @@ grant <- function(.data, ..., cols = NULL) {
 #'
 #' @export
 #' @inheritParams grant
-#' @examplesIf interactive() && has_postgres()
+#' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
@@ -55,6 +58,9 @@ grant <- function(.data, ..., cols = NULL) {
 #' rls_tbl(con, "passwd") %>%
 #'   revoke(update, cols = c("real_name", "home_phone")) %>%
 #'   from(jane)
+#' 
+#' # cleanup
+#' dbDisconnect(con)
 revoke <- function(.data, ..., cols = NULL) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   .data <- as_priv(.data)
@@ -81,13 +87,23 @@ revoke <- function(.data, ..., cols = NULL) {
 #'    setup_example_table(con, "passwd")
 #' }
 #'
-#' rls_tbl(con, "passwd") %>% to(jane)
-#' rls_tbl(con, "passwd") %>% to(jane, bob, alice)
+#' rls_tbl(con, "passwd") %>% grant(select) %>% to(jane)
+#' rls_tbl(con, "passwd") %>% grant(select) %>% from(jane)
+#' rls_tbl(con, "passwd") %>% grant(select) %>% to(jane, bob, alice)
+#' 
+#' # Errors: doesn't make sense to pass rls_tbl output directly to to/from
+#' # rls_tbl(con, "passwd") %>% from(jane)
+#' # #> ! must pass privilege or row_policy to to/from
+#' 
+#' # cleanup
+#' dbDisconnect(con)
 to <- function(.data, ...) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
-  .data <- switch(class(.data),
+  assert_is(.data, c("privilege", "row_policy", "tbl_sql"))
+  .data <- switch_multiclass(class(.data),
     privilege = as_priv(.data),
-    row_policy = as_row_policy(.data)
+    row_policy = as_row_policy(.data),
+    tbl_sql = rls_abort("must pass privilege or row_policy to to/from")
   )
   .data$user <- dot_names(...)
   .data
@@ -103,7 +119,7 @@ from <- to
 #' @keywords internal
 #' @param priv an S3 object of class `privilege`, required
 #' @param con DBI connection object, required
-#' @examplesIf interactive()
+#' @examplesIf interactive() && has_postgres()
 #' library(tibble)
 #' library(RPostgres)
 #' library(DBI)
@@ -121,7 +137,7 @@ from <- to
 #' #  ON fruits
 #' #  TO jane
 #' priv <-
-#'   rls_tbl(con, "flights") %>%
+#'   rls_tbl(con, "fruits") %>%
 #'   grant(select) %>%
 #'   to(jane)
 #' priv
@@ -147,7 +163,13 @@ from <- to
 #'   to(jane)
 #' priv
 #' sql <- translate_privilege(priv, con)
+#' sql
 #' dbExecute(con, sql)
+#' 
+#' # cleanup
+#' dbRemoveTable(con, "fruits")
+#' dbExecute(con, "DROP ROLE jane")
+#' dbDisconnect(con)
 translate_privilege <- function(priv, con) {
   assert_is(priv, "privilege")
   is_conn(con)

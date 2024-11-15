@@ -15,7 +15,7 @@ translate_privilege(priv, con)
 Translate privilege
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(tibble)
 library(RPostgres)
 library(DBI)
@@ -33,7 +33,7 @@ auto_pipe(FALSE)
 #  ON fruits
 #  TO jane
 priv <-
-  rls_tbl(con, "flights") \%>\%
+  rls_tbl(con, "fruits") \%>\%
   grant(select) \%>\%
   to(jane)
 priv
@@ -59,7 +59,13 @@ priv <-
   to(jane)
 priv
 sql <- translate_privilege(priv, con)
+sql
 dbExecute(con, sql)
+
+# cleanup
+dbRemoveTable(con, "fruits")
+dbExecute(con, "DROP ROLE jane")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
 \keyword{internal}

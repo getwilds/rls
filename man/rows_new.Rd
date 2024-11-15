@@ -21,7 +21,7 @@ Create rule for new rows
 Use either \code{check} or \code{sql}, not both
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
@@ -42,5 +42,8 @@ rls_tbl(con, "passwd") \%>\%
   rows_existing(sql = 'current_user = "user_name"') \%>\%
   rows_new(home_phone == "098-765-4321") \%>\%
   to(jane)
+
+# cleanup
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

@@ -17,7 +17,7 @@ grant(.data, ..., cols = NULL)
 Grant
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
@@ -36,5 +36,8 @@ rls_tbl(con, "passwd") \%>\%
 rls_tbl(con, "passwd") \%>\%
   grant(update, select, cols = c("real_name", "home_phone")) \%>\%
   to(jane)
+
+# cleanup
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

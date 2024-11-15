@@ -76,3 +76,14 @@ dot_names <- function(...) {
 collapse <- function(x) {
   paste(x, collapse = ", ")
 }
+
+#' switch that handles more than 1 class in the EXPR variable
+#' @noRd
+switch_multiclass <- function(EXPR, ...) {
+  classes <- c("tbl_sql", "privilege", "row_policy")
+  check_in <- classes %in% EXPR
+  if (!any(check_in)) {
+    rls_abort(format_error(".data must be one of {clz_col(classes)}"))
+  }
+  switch(classes[check_in], ...)
+}

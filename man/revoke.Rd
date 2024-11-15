@@ -17,7 +17,7 @@ revoke(.data, ..., cols = NULL)
 Revoke
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
@@ -32,5 +32,8 @@ rls_tbl(con, "passwd") \%>\%
 rls_tbl(con, "passwd") \%>\%
   revoke(update, cols = c("real_name", "home_phone")) \%>\%
   from(jane)
+
+# cleanup
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

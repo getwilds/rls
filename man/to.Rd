@@ -26,7 +26,15 @@ if (!dbExistsTable(con, "passwd")) {
    setup_example_table(con, "passwd")
 }
 
-rls_tbl(con, "passwd") \%>\% to(jane)
-rls_tbl(con, "passwd") \%>\% to(jane, bob, alice)
+rls_tbl(con, "passwd") \%>\% grant(select) \%>\% to(jane)
+rls_tbl(con, "passwd") \%>\% grant(select) \%>\% from(jane)
+rls_tbl(con, "passwd") \%>\% grant(select) \%>\% to(jane, bob, alice)
+
+# Errors: doesn't make sense to pass rls_tbl output directly to to/from
+# rls_tbl(con, "passwd") \%>\% from(jane)
+# #> ! must pass privilege or row_policy to to/from
+
+# cleanup
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

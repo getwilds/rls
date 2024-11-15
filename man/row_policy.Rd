@@ -15,7 +15,7 @@ row_policy(.data, name)
 Row policy
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
@@ -25,5 +25,10 @@ if (!dbExistsTable(con, "passwd")) {
 rls_tbl(con, "passwd") \%>\%
   row_policy("my_policy") \%>\%
   rls_run()
+rls_policies(con)
+
+# cleanup
+rls_drop_policies(con)
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

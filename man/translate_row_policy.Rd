@@ -15,11 +15,14 @@ translate_row_policy(policy, con)
 Translate row policy
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-library(RPostgres)
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
+library(RPostgres)
 con <- dbConnect(Postgres())
 setup_example_table(con)
+
+# create role
+dbExecute(con, "CREATE ROLE jane")
 
 if (rls_policy_exists(con, "blue_policy")) {
   rls_drop_policy(con, name = "blue_policy", table = "passwd")
@@ -35,6 +38,11 @@ policy
 sql <- translate_row_policy(policy, con)
 sql
 dbExecute(con, sql)
+
+# cleanup
+rls_drop_policies(con)
+dbExecute(con, "DROP ROLE jane")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
 \references{

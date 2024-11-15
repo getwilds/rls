@@ -20,7 +20,7 @@ Create rule for existing rows
 Use either \code{using} or \code{sql}, not both
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
@@ -31,5 +31,8 @@ rls_tbl(con, "passwd") \%>\%
   row_policy("a_good_policy") \%>\%
   commands(update) \%>\%
   rows_existing(sql = 'current_user = "user_name"')
+
+# cleanup
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

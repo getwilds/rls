@@ -3,7 +3,7 @@
 #' @export
 #' @inheritParams grant
 #' @param name (character) scalar name for the policy. required
-#' @examplesIf interactive() && has_postgres()
+#' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
@@ -13,6 +13,11 @@
 #' rls_tbl(con, "passwd") %>%
 #'   row_policy("my_policy") %>%
 #'   rls_run()
+#' rls_policies(con)
+#' 
+#' # cleanup
+#' rls_drop_policies(con)
+#' dbDisconnect(con)
 row_policy <- function(.data, name) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   assert_is(name, "character")
@@ -26,7 +31,7 @@ row_policy <- function(.data, name) {
 #' 
 #' @export
 #' @inheritParams grant
-#' @examplesIf interactive() && has_postgres()
+#' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
@@ -36,6 +41,9 @@ row_policy <- function(.data, name) {
 #' rls_tbl(con, "passwd") %>%
 #'   row_policy("their_policy") %>%
 #'   commands(update)
+#' 
+#' # cleanup
+#' dbDisconnect(con)
 commands <- function(.data, ...) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   .data <- as_row_policy(.data)
@@ -50,7 +58,7 @@ commands <- function(.data, ...) {
 #' @param using an expression to use to check against existing rows
 #' @param sql (character) sql syntax to use for existing rows
 #' @details Use either `using` or `sql`, not both
-#' @examplesIf interactive() && has_postgres()
+#' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
@@ -61,6 +69,9 @@ commands <- function(.data, ...) {
 #'   row_policy("a_good_policy") %>%
 #'   commands(update) %>%
 #'   rows_existing(sql = 'current_user = "user_name"')
+#' 
+#' # cleanup
+#' dbDisconnect(con)
 rows_existing <- function(.data, using = NULL, sql = NULL) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   using_quo <- enquo(using)
@@ -84,7 +95,7 @@ rows_existing <- function(.data, using = NULL, sql = NULL) {
 #' new rows or editing of existing rows
 #' @param sql (character) sql syntax to use for new rows
 #' @details Use either `check` or `sql`, not both
-#' @examplesIf interactive() && has_postgres()
+#' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
@@ -105,6 +116,9 @@ rows_existing <- function(.data, using = NULL, sql = NULL) {
 #'   rows_existing(sql = 'current_user = "user_name"') %>%
 #'   rows_new(home_phone == "098-765-4321") %>%
 #'   to(jane)
+#' 
+#' # cleanup
+#' dbDisconnect(con)
 rows_new <- function(.data, check = NULL, sql = NULL) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   check_quo <- enquo(check)
@@ -137,11 +151,14 @@ express <- function(x) {
 #' @param policy an S3 object of class `row_policy`, required
 #' @param con DBI connection object, required
 #' @references <https://www.postgresql.org/docs/current/sql-createpolicy.html>
-#' @examplesIf interactive()
-#' library(RPostgres)
+#' @examplesIf has_postgres()
 #' library(DBI)
+#' library(RPostgres)
 #' con <- dbConnect(Postgres())
 #' setup_example_table(con)
+#' 
+#' # create role
+#' dbExecute(con, "CREATE ROLE jane")
 #'
 #' if (rls_policy_exists(con, "blue_policy")) {
 #'   rls_drop_policy(con, name = "blue_policy", table = "passwd")
@@ -157,6 +174,11 @@ express <- function(x) {
 #' sql <- translate_row_policy(policy, con)
 #' sql
 #' dbExecute(con, sql)
+#' 
+#' # cleanup
+#' rls_drop_policies(con)
+#' dbExecute(con, "DROP ROLE jane")
+#' dbDisconnect(con)
 translate_row_policy <- function(policy, con) {
   is_conn(con)
   create_statement <- switch(class(con),
