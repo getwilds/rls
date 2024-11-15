@@ -41,18 +41,26 @@ First run the code in \link{passwd}, then run the below code
 }
 
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
-rls_privileges(con, "passwd")
-rls_privileges(con, "passwd", "aliceuser")
+setup_example_table(con)
+dbExecute(con, "CREATE ROLE jane")
 
-policy1 <- rls_construct_policy(
-  name = "stuff",
-  table = "passwd",
-  using = "(true)"
-)
-rls_create_policy(con, policy1)
 rls_privileges(con, "passwd")
+
+rls_tbl(con, "passwd") \%>\%
+  row_policy(name = "stuff") \%>\%
+  rows_existing(TRUE) \%>\%
+  to(jane) \%>\% 
+  rls_run()
+
+rls_privileges(con, "passwd", "jane")
+
+# cleanup
+dbRemoveTable(con, "passwd")
+dbExecute(con, "DROP ROLE jane")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

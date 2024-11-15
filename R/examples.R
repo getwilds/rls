@@ -8,13 +8,17 @@
 #' @param con a postgres or redshift connection object
 #' @param which (character) the table to create. only option right
 #' now is "passwd"
-#' @examplesIf interactive() && has_postgres()
+#' @examplesIf has_postgres()
 #' library(RPostgres)
 #' library(dplyr)
 #' library(dbplyr)
 #' library(tibble)
 #'
 #' con <- dbConnect(Postgres())
+#'
+#' if (dbExistsTable(con, "passwd")) {
+#'   dbRemoveTable(con, "passwd")
+#' }
 #'
 #' # Create a table
 #' ## Create the table (with no data)
@@ -48,12 +52,19 @@
 #'
 #' ## Check that the data is in the table
 #' tbl(con, "passwd")
+#'
+#' ## Cleanup
+#' dbRemoveTable(con, "passwd")
+#' dbDisconnect(con)
 setup_example_table <- function(con, which = "passwd") {
 	options <- c("passwd")
 	if (!which %in% options) {
 		rls_abort(
 			format_error("{.arg {which}} must be one of {clz_col(options)}")
 		)
+	}
+	if (dbExistsTable(con, which)) {
+		dbRemoveTable(con, which)
 	}
 	dbExecute(con, eg_schemas[[which]])
 	rows_append(

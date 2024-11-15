@@ -21,10 +21,24 @@ each of the main commands: select, insert, update, delete
 Table level privileges
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
 library(RPostgres)
+library(glue)
 con <- dbConnect(Postgres())
+user <- rls_current_user(con)
+
+dbExecute(con, "CREATE ROLE stevie")
+dbExecute(con, "GRANT CREATE ON SCHEMA PUBLIC TO stevie")
+dbExecute(con, "SET SESSION AUTHORIZATION stevie")
+setup_example_table(con)
 rls_table_privileges(con, "passwd")
-rls_table_privileges(con, "orange")
+
+# cleanup
+dbRemoveTable(con, "passwd")
+dbExecute(con, glue("SET SESSION AUTHORIZATION {user}"))
+dbExecute(con, "REVOKE CREATE ON SCHEMA PUBLIC FROM stevie")
+dbExecute(con, "DROP ROLE stevie")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

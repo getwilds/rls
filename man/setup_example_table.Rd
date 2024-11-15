@@ -17,13 +17,17 @@ now is "passwd"}
 Setup for running examples throughout this package
 }
 \examples{
-\dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(RPostgres)
 library(dplyr)
 library(dbplyr)
 library(tibble)
 
 con <- dbConnect(Postgres())
+
+if (dbExistsTable(con, "passwd")) {
+  dbRemoveTable(con, "passwd")
+}
 
 # Create a table
 ## Create the table (with no data)
@@ -57,5 +61,9 @@ rows_append(
 
 ## Check that the data is in the table
 tbl(con, "passwd")
+
+## Cleanup
+dbRemoveTable(con, "passwd")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

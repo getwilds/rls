@@ -98,7 +98,9 @@ pipe_autoexec <- function(toggle) {
 #' @noRd
 pipeline_on_exit <- function(env) {
   # Only activate the first time; after this the binding is already active.
-  if (exists(".rls_exitfun", envir = env, inherits = FALSE, mode = "function")) {
+  if (
+    exists(".rls_exitfun", envir = env, inherits = FALSE, mode = "function")
+  ) {
     return(invisible())
   }
   env$.rls_exitfun <- identity

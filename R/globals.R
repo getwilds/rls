@@ -2,8 +2,8 @@
 
 utils::globalVariables(c(
   ".rls_exitfun", # <pipeline_on_exit>
-  "privilege_type", # <rls_tbl>
   "%like%", # <rls_list_roles>
   "rolname", # <rls_list_roles>
+  "privilege_type", # <rls_tbl>
   NULL
 ))
