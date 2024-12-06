@@ -1,84 +1,125 @@
-#' As s3 privilege
-#' @name privileges
-NULL
-
-#' As s3 privilege
-#' @keywords internal
-as_privilege <- function(user = NULL, on = NULL, grant = NULL) {
-  structure(list(
-    user = user,
-    on = on,
-    grant = grant
-  ), class = "privilege")
-}
-
-#' @export
-print.privilege <- function(x, ...) {
-  cat("<privilege>\n")
-  for (i in seq_along(x)) {
-    cat(glue("  {names(x)[i]}: {x[[i]]}\n", .trim = FALSE))
-  }
-}
-
-#' User
+#' Grant
 #'
-#' @importFrom rlang as_name enquo
 #' @export
-#' @rdname privileges
-#' @param name (character) a user (role) name
-#' @examples
-#' user(jane)
-user <- function(name) {
-  as_privilege(user = as_name(enquo(name)))
-}
-
-#' On
-#'
-#' @importFrom rlang names2 enquos
-#' @export
-#' @rdname privileges
 #' @param .data an s3 object of class `privilege`
-#' @param table a table name
-#' @param ... column names, 0 or more
-#' @examples
-#' user(jane) |> on(fruits, apples)
-#' user(jane) |> on(fruits, apples, bananas, pears)
-on <- function(.data, table, ...) {
-  quos <- enquos(...)
-  is_named <- (names2(quos) != "")
-  # named_quos <- quos[is_named]
-  unnamed_quos <- quos[!is_named]
-  if (length(unnamed_quos)) {
-    unnamed_quos <- unname(vapply(unnamed_quos, as_name, ""))
-  }
-  .data$on <- list(
-    table = as_name(enquo(table)),
-    columns = unnamed_quos
+#' @param ... one of all, select, update, insert, delete
+#' @param cols (character) vector of column names
+#' @examplesIf has_postgres()
+#' library(DBI)
+#' library(RPostgres)
+#' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
+#'
+#' rls_tbl(con, "passwd") %>%
+#'   grant(update) %>%
+#'   to(jane)
+#'
+#' rls_tbl(con, "passwd") %>%
+#'   grant(update, delete) %>%
+#'   to(jane)
+#'
+#' rls_tbl(con, "passwd") %>%
+#'   grant(update, select, cols = c("real_name", "home_phone")) %>%
+#'   to(jane)
+#' 
+#' # cleanup
+#' dbDisconnect(con)
+grant <- function(.data, ..., cols = NULL) {
+  pipe_autoexec(toggle = rls_env$auto_pipe)
+  .data <- as_priv(.data)
+  .data$type <- "grant"
+  .data$privilege <- append(
+    .data$privilege,
+    list(
+      rls_grant(toupper(dot_names(...)), cols %||% "")
+    )
   )
   .data
 }
 
-#' Grant
+#' Revoke
 #'
 #' @export
-#' @rdname privileges
-#' @param .data an s3 object of class `privilege`
-#' @param command one of all, select, update, insert, delete
-#' @examples
-#' user(jane) |> on(fruits, apples) |> grant(select)
-grant <- function(.data, command) {
-  .data$grant <- toupper(as_name(enquo(command)))
+#' @inheritParams grant
+#' @examplesIf has_postgres()
+#' library(DBI)
+#' library(RPostgres)
+#' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
+#'
+#' rls_tbl(con, "passwd") %>%
+#'   revoke(update) %>%
+#'   from(jane)
+#'
+#' rls_tbl(con, "passwd") %>%
+#'   revoke(update, cols = c("real_name", "home_phone")) %>%
+#'   from(jane)
+#' 
+#' # cleanup
+#' dbDisconnect(con)
+revoke <- function(.data, ..., cols = NULL) {
+  pipe_autoexec(toggle = rls_env$auto_pipe)
+  .data <- as_priv(.data)
+  .data$type <- "revoke"
+  .data$privilege <- append(
+    .data$privilege,
+    list(
+      rls_revoke(toupper(dot_names(...)), cols %||% "")
+    )
+  )
   .data
 }
 
-#' Grant
+#' To a role or user
 #'
-#' @importFrom glue glue_sql
 #' @export
-#' @rdname privileges
-#' @param priv an s3 object of class `privilege`, required
+#' @param .data a `privilege` object
+#' @param ... (character) one or more user (or role) names
+#' @examplesIf interactive() && has_postgres()
+#' library(DBI)
+#' library(RPostgres)
+#' con <- dbConnect(Postgres())
+#' if (!dbExistsTable(con, "passwd")) {
+#'    setup_example_table(con, "passwd")
+#' }
+#'
+#' rls_tbl(con, "passwd") %>% grant(select) %>% to(jane)
+#' rls_tbl(con, "passwd") %>% grant(select) %>% from(jane)
+#' rls_tbl(con, "passwd") %>% grant(select) %>% to(jane, bob, alice)
+#' 
+#' # Errors: doesn't make sense to pass rls_tbl output directly to to/from
+#' # rls_tbl(con, "passwd") %>% from(jane)
+#' # #> ! must pass privilege or row_policy to to/from
+#' 
+#' # cleanup
+#' dbDisconnect(con)
+to <- function(.data, ...) {
+  pipe_autoexec(toggle = rls_env$auto_pipe)
+  assert_is(.data, c("privilege", "row_policy", "tbl_sql"))
+  .data <- switch_multiclass(class(.data),
+    privilege = as_priv(.data),
+    row_policy = as_row_policy(.data),
+    tbl_sql = rls_abort("must pass privilege or row_policy to to/from")
+  )
+  .data$user <- dot_names(...)
+  .data
+}
+
+#' @export
+#' @rdname to
+from <- to
+
+#' Translate privilege
+#'
+#' @export
+#' @keywords internal
+#' @param priv an S3 object of class `privilege`, required
 #' @param con DBI connection object, required
-#' @examplesIf interactive() && rlang::is_installed("dbplyr")
+#' @examplesIf interactive() && has_postgres()
 #' library(tibble)
 #' library(RPostgres)
 #' library(DBI)
@@ -88,28 +129,83 @@ grant <- function(.data, command) {
 #'   apples = c("pink lady", "cortland", "mcintosh"),
 #'   strawberries = c("alice", "albion", "alaska pioneer")
 #' )
-#' DBI::dbWriteTable(con, "fruits", dat)
+#' dbWriteTable(con, "fruits", dat)
 #' dbExecute(con, "CREATE ROLE jane")
+#' auto_pipe(FALSE)
+#'
+#' # GRANT SELECT
+#' #  ON fruits
+#' #  TO jane
+#' priv <-
+#'   rls_tbl(con, "fruits") %>%
+#'   grant(select) %>%
+#'   to(jane)
+#' priv
+#' translate_privilege(priv, con)
+#'
+#' # REVOKE SELECT
+#' #  ON fruits
+#' #  FROM jane
+#' priv <-
+#'   rls_tbl(con, "fruits") %>%
+#'   revoke(select) %>%
+#'   from(jane)
+#' priv
+#' translate_privilege(priv, con)
 #'
 #' # GRANT SELECT
 #' #  (apples, strawberries)
 #' #  ON fruits
 #' #  TO jane
-#' sql <- user(jane) |>
-#'   on(fruits, apples, strawberries) |>
-#'   grant(select) |>
-#'   translate_privilege(con)
+#' priv <-
+#'   rls_tbl(con, "fruits") %>%
+#'   grant(select, cols = c("apples", "strawberries")) %>%
+#'   to(jane)
+#' priv
+#' sql <- translate_privilege(priv, con)
+#' sql
 #' dbExecute(con, sql)
-#' # can't pipe into dbExecute for some reason
-#' # could in theory include dbExecute in translate_privilege?
+#' 
+#' # cleanup
+#' dbRemoveTable(con, "fruits")
+#' dbExecute(con, "DROP ROLE jane")
+#' dbDisconnect(con)
 translate_privilege <- function(priv, con) {
-  stopifnot(inherits(priv, "privilege"))
-  sql <- glue_sql("
-    GRANT command
-    ({`columns`*})
-    ON {`priv$on$table`}
-    TO {`priv$user`}
-    ", priv = priv, columns = priv$on$columns, .con = con
+  assert_is(priv, "privilege")
+  is_conn(con)
+
+  template <- priv_templates[[priv$type]]
+
+  table_cols <- collapse(lapply(priv$privilege, \(w) {
+    cols <- collapse(w$cols)
+    sprintf(
+      "%s %s",
+      collapse(w$commands),
+      ifelse(is_really_empty(cols), "", glue("({cols})"))
+    )
+  }))
+
+  query <- sprintf(
+    template,
+    table_cols,
+    attr(priv$data, "table"),
+    priv$user
   )
-  sub("command", priv$grant, sql)
+  query <- trimws_inside(trimws(query, which = "both"))
+  sql(query)
+}
+
+priv_templates <- list(
+  grant = "GRANT %s ON %s TO %s",
+  revoke = "REVOKE %s ON %s FROM %s"
+)
+
+rls_grant <- function(commands, cols) {
+  x <- list(commands = commands, cols = cols)
+  structure(x, class = "rls_grant")
+}
+
+rls_revoke <- function(commands, cols) {
+  x <- list(commands = commands, cols = cols)
+  structure(x, class = "rls_revoke")
 }

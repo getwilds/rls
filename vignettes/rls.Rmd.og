@@ -18,7 +18,7 @@ Row Level Security for PostgreSQL and AWS Redshift.
 
 The following is a walk-through of using row level security in PostgreSQL, including checks to make sure policies behave as expected.
 
-```{r setup}
+```{r setup, message=FALSE, warning=FALSE}
 library(tibble)
 library(DBI)
 library(RPostgres)
@@ -39,6 +39,17 @@ con <- dbConnect(Postgres())
 
 ```{r echo=FALSE}
 user <- dbGetQuery(con, "select current_user")$current_user
+```
+
+## Create roles
+
+```{r results="hide"}
+# Administrator
+dbExecute(con, "CREATE ROLE admin")
+# Normal user
+dbExecute(con, "CREATE ROLE bob")
+# Another normal user
+dbExecute(con, "CREATE ROLE alice")
 ```
 
 ## Create a table
@@ -87,17 +98,6 @@ Check that the data is in the table
 tbl(con, "passwd")
 ```
 
-## Create roles
-
-```{r results="hide"}
-# Administrator
-dbExecute(con, "CREATE ROLE admin")
-# Normal user
-dbExecute(con, "CREATE ROLE bob")
-# Another normal user
-dbExecute(con, "CREATE ROLE alice")
-```
-
 ## Enable row level security
 
 Enable row level security with `rls_enable`
@@ -117,27 +117,25 @@ rls_check_status(con, "passwd")
 `admin_all` = Administrator can see all rows and add any rows
 
 ```{r}
-(policy1 <- rls_construct_policy(
-  name = "admin_all",
-  table = "passwd",
-  role = "admin",
-  using = "(true)",
-  check = "(true)"
-))
-rls_create_policy(con, policy1)
+policy1 <- rls_tbl(con, "passwd") %>%
+  row_policy("admin_all") %>%
+  rows_existing(TRUE) %>%
+  rows_new(TRUE) %>%
+  to(admin)
+policy1
+rls_run(policy1)
 rls_policies(con)
 ```
 
 `all_view` = Normal users can view all rows
 
 ```{r}
-(policy2 <- rls_construct_policy(
-  name = "all_view",
-  table = "passwd",
-  command = "SELECT",
-  using = "(true)"
-))
-rls_create_policy(con, policy2)
+policy2 <- rls_tbl(con, "passwd") %>%
+  row_policy("all_view") %>%
+  commands(select) %>%
+  rows_existing(TRUE)
+policy2
+rls_run(policy2)
 rls_policies(con)
 ```
 
@@ -145,44 +143,53 @@ rls_policies(con)
 which shells a normal user is allowed to set
 
 ```{r}
-(policy3 <- rls_construct_policy(
-  name = "user_mod",
-  table = "passwd",
-  command = "UPDATE",
-  using = "(current_user = user_name)",
-  check = "(
+policy3 <- rls_tbl(con, "passwd") %>%
+  row_policy("user_mod") %>%
+  commands(update) %>%
+  rows_existing(sql = 'current_user = user_name') %>%
+  rows_new(sql = '
     current_user = user_name AND
-    shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
-  )"
-))
-rls_create_policy(con, policy3)
+    shell IN (\'/bin/bash\',\'/bin/sh\',\'/bin/zsh\')'
+  )
+policy3
+rls_run(policy3)
 rls_policies(con)
 ```
 
-## Grant permissions
+## Grant column level permissions
 
 Allow admin all normal rights
 
 ```{r results="hide"}
-dbExecute(con, "GRANT SELECT, INSERT, UPDATE, DELETE ON passwd TO admin")
+rls_tbl(con, "passwd") %>%
+  grant(select, insert, update, delete) %>%
+  to(admin) %>%
+  rls_run()
 ```
 
 Users only get select access on public columns
 
 ```{r results="hide"}
-dbExecute(con, "GRANT SELECT
-  (user_name, uid, gid, real_name, home_phone, home_dir, shell)
-  ON passwd TO public"
-)
+rls_tbl(con, "passwd") %>%
+  grant(select,
+    cols = c(
+      "user_name", "uid", "gid", "real_name",
+      "home_phone", "home_dir", "shell"
+    )
+  ) %>%
+  to(public) %>%
+  rls_run()
 ```
 
 Allow users to update certain columns
 
 ```{r results="hide"}
-dbExecute(con, "GRANT UPDATE
-  (pwhash, real_name, home_phone, shell)
-  ON passwd TO public"
-)
+rls_tbl(con, "passwd") %>%
+  grant(update,
+    cols = c("pwhash", "real_name", "home_phone", "shell")
+  ) %>%
+  to(public) %>%
+  rls_run()
 ```
 
 ## Ensure the system behaves as expected
@@ -261,3 +268,4 @@ dbExecute(con, "DROP ROLE admin")
 dbExecute(con, "DROP ROLE bob")
 dbExecute(con, "DROP ROLE alice")
 ```
+

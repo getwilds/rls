@@ -8,7 +8,7 @@ Authors@R: c(
   )
 Description: Row level security helpers. Currenlty supports
     PostgreSQL and Redshift flavored PostgreSQL.
-URL: https://github.com/getwilds/rls, http://getwilds.org/rls
+URL: https://github.com/getwilds/rls, https://getwilds.org/rls
 BugReports: https://github.com/getwilds/rls/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -18,12 +18,14 @@ RoxygenNote: 7.3.2
 Imports: 
     DBI,
     dplyr,
-    glue,
-    rlang,
+    dbplyr,
     RPostgres,
     tibble,
-    dbplyr,
-    withr
+    withr,
+    glue,
+    cli,
+    rlang,
+    magrittr
 Suggests: 
     knitr,
     rmarkdown,

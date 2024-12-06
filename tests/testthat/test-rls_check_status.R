@@ -1,6 +1,7 @@
 test_that("rls_check_status", {
   with_database_connection({
-    DBI::dbWriteTable(con, "attitude", attitude, temporary = TRUE)
+    DBI::dbWriteTable(con, "attitude", attitude,
+      overwrite = TRUE, temporary = TRUE)
     on.exit(DBI::dbRemoveTable(con, "attitude"), add = TRUE)
 
     rls_enable(con, table = "attitude")

@@ -1,6 +1,7 @@
 test_that("rls_disable", {
   with_database_connection({
-    DBI::dbWriteTable(con, "iris", iris, temporary = TRUE)
+    DBI::dbWriteTable(con, "iris", iris,
+      overwrite = TRUE, temporary = TRUE)
     on.exit(DBI::dbRemoveTable(con, "iris"), add = TRUE)
 
     enabled <- rls_enable(con, table = "iris")

@@ -19,20 +19,7 @@ library(tibble)
 library(DBI)
 library(RPostgres)
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 library(dbplyr)
-#> 
-#> Attaching package: 'dbplyr'
-#> The following objects are masked from 'package:dplyr':
-#> 
-#>     ident, sql
 library(rls)
 ```
 
@@ -48,6 +35,18 @@ con <- dbConnect(Postgres())
 ```
 
 
+
+## Create roles
+
+
+``` r
+# Administrator
+dbExecute(con, "CREATE ROLE admin")
+# Normal user
+dbExecute(con, "CREATE ROLE bob")
+# Another normal user
+dbExecute(con, "CREATE ROLE alice")
+```
 
 ## Create a table
 
@@ -106,18 +105,6 @@ tbl(con, "passwd")
 #> 3 alice     xxx        2     1 Alice     098-765-4321 /home/alice /bin/zsh
 ```
 
-## Create roles
-
-
-``` r
-# Administrator
-dbExecute(con, "CREATE ROLE admin")
-# Normal user
-dbExecute(con, "CREATE ROLE bob")
-# Another normal user
-dbExecute(con, "CREATE ROLE alice")
-```
-
 ## Enable row level security
 
 Enable row level security with `rls_enable`
@@ -144,20 +131,25 @@ rls_check_status(con, "passwd")
 
 
 ``` r
-(policy1 <- rls_construct_policy(
-  name = "admin_all",
-  table = "passwd",
-  role = "admin",
-  using = "(true)",
-  check = "(true)"
-))
-#> <rls_policy>
-#>   policy name: admin_all
-#>   table: passwd
-#>   role: admin
-#>   using: (true)
-#>   check: (true)
-rls_create_policy(con, policy1)
+policy1 <- rls_tbl(con, "passwd") %>%
+  row_policy("admin_all") %>%
+  rows_existing(TRUE) %>%
+  rows_new(TRUE) %>%
+  to(admin)
+policy1
+#> <row_policy> admin_all
+#>   user: admin
+#>   existing rows: TRUE
+#>   new rows: TRUE
+#> # Source:   SQL [3 x 8]
+#> # Database: postgres  [schambe3@/tmp:5432/schambe3]
+#>     gid home_dir    home_phone   pwhash real_name shell       uid user_name
+#>   <int> <chr>       <chr>        <chr>  <chr>     <chr>     <int> <chr>    
+#> 1     0 /root       111-222-3333 xxx    Admin     /bin/dash     0 admin    
+#> 2     1 /home/bob   123-456-7890 xxx    Bob       /bin/zsh      1 bob      
+#> 3     1 /home/alice 098-765-4321 xxx    Alice     /bin/zsh      2 alice
+rls_run(policy1)
+#> [1] 0
 rls_policies(con)
 #> # A tibble: 1 × 8
 #>   schemaname tablename policyname permissive roles      cmd   qual  with_check
@@ -169,18 +161,23 @@ rls_policies(con)
 
 
 ``` r
-(policy2 <- rls_construct_policy(
-  name = "all_view",
-  table = "passwd",
-  command = "SELECT",
-  using = "(true)"
-))
-#> <rls_policy>
-#>   policy name: all_view
-#>   table: passwd
-#>   command: SELECT
-#>   using: (true)
-rls_create_policy(con, policy2)
+policy2 <- rls_tbl(con, "passwd") %>%
+  row_policy("all_view") %>%
+  commands(select) %>%
+  rows_existing(TRUE)
+policy2
+#> <row_policy> all_view
+#>   commands: select
+#>   existing rows: TRUE
+#> # Source:   SQL [3 x 8]
+#> # Database: postgres  [schambe3@/tmp:5432/schambe3]
+#>     gid home_dir    home_phone   pwhash real_name shell       uid user_name
+#>   <int> <chr>       <chr>        <chr>  <chr>     <chr>     <int> <chr>    
+#> 1     0 /root       111-222-3333 xxx    Admin     /bin/dash     0 admin    
+#> 2     1 /home/bob   123-456-7890 xxx    Bob       /bin/zsh      1 bob      
+#> 3     1 /home/alice 098-765-4321 xxx    Alice     /bin/zsh      2 alice
+rls_run(policy2)
+#> [1] 0
 rls_policies(con)
 #> # A tibble: 2 × 8
 #>   schemaname tablename policyname permissive roles      cmd    qual  with_check
@@ -194,26 +191,30 @@ which shells a normal user is allowed to set
 
 
 ``` r
-(policy3 <- rls_construct_policy(
-  name = "user_mod",
-  table = "passwd",
-  command = "UPDATE",
-  using = "(current_user = user_name)",
-  check = "(
+policy3 <- rls_tbl(con, "passwd") %>%
+  row_policy("user_mod") %>%
+  commands(update) %>%
+  rows_existing(sql = 'current_user = user_name') %>%
+  rows_new(sql = '
     current_user = user_name AND
-    shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
-  )"
-))
-#> <rls_policy>
-#>   policy name: user_mod
-#>   table: passwd
-#>   command: UPDATE
-#>   using: (current_user = user_name)
-#>   check: (
+    shell IN (\'/bin/bash\',\'/bin/sh\',\'/bin/zsh\')'
+  )
+policy3
+#> <row_policy> user_mod
+#>   commands: update
+#>   existing rows: current_user = user_name
+#>   new rows: 
 #>     current_user = user_name AND
-#>     shell IN ('/bin/bash','/bin/sh','/bin/dash','/bin/zsh','/bin/tcsh')
-#>   )
-rls_create_policy(con, policy3)
+#>     shell IN ('/bin/bash','/bin/sh','/bin/zsh')
+#> # Source:   SQL [3 x 8]
+#> # Database: postgres  [schambe3@/tmp:5432/schambe3]
+#>     gid home_dir    home_phone   pwhash real_name shell       uid user_name
+#>   <int> <chr>       <chr>        <chr>  <chr>     <chr>     <int> <chr>    
+#> 1     0 /root       111-222-3333 xxx    Admin     /bin/dash     0 admin    
+#> 2     1 /home/bob   123-456-7890 xxx    Bob       /bin/zsh      1 bob      
+#> 3     1 /home/alice 098-765-4321 xxx    Alice     /bin/zsh      2 alice
+rls_run(policy3)
+#> [1] 0
 rls_policies(con)
 #> # A tibble: 3 × 8
 #>   schemaname tablename policyname permissive roles      cmd    qual   with_check
@@ -223,33 +224,43 @@ rls_policies(con)
 #> 3 public     passwd    user_mod   PERMISSIVE {public}   UPDATE (CURR… ((CURRENT…
 ```
 
-## Grant permissions
+## Grant column level permissions
 
 Allow admin all normal rights
 
 
 ``` r
-dbExecute(con, "GRANT SELECT, INSERT, UPDATE, DELETE ON passwd TO admin")
+rls_tbl(con, "passwd") %>%
+  grant(select, insert, update, delete) %>%
+  to(admin) %>%
+  rls_run()
 ```
 
 Users only get select access on public columns
 
 
 ``` r
-dbExecute(con, "GRANT SELECT
-  (user_name, uid, gid, real_name, home_phone, home_dir, shell)
-  ON passwd TO public"
-)
+rls_tbl(con, "passwd") %>%
+  grant(select,
+    cols = c(
+      "user_name", "uid", "gid", "real_name",
+      "home_phone", "home_dir", "shell"
+    )
+  ) %>%
+  to(public) %>%
+  rls_run()
 ```
 
 Allow users to update certain columns
 
 
 ``` r
-dbExecute(con, "GRANT UPDATE
-  (pwhash, real_name, home_phone, shell)
-  ON passwd TO public"
-)
+rls_tbl(con, "passwd") %>%
+  grant(update,
+    cols = c("pwhash", "real_name", "home_phone", "shell")
+  ) %>%
+  to(public) %>%
+  rls_run()
 ```
 
 ## Ensure the system behaves as expected
@@ -353,6 +364,7 @@ other rows
 dbExecute(con, "UPDATE passwd SET pwhash = 'abc'")
 #> [1] 1
 ```
+
 
 
 

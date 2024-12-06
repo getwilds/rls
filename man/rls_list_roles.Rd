@@ -17,8 +17,12 @@ List roles
 }
 \examples{
 \dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
 rls_list_roles(con)
+
+# cleanup
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

@@ -4,14 +4,15 @@
 \alias{rls_column_privileges}
 \title{Column level privileges}
 \usage{
-rls_column_privileges(con, table, user_role, schema = "public")
+rls_column_privileges(con, table, user_role = NULL, schema = "public")
 }
 \arguments{
 \item{con}{a postgres or redshift connection object}
 
 \item{table}{(character) a table name}
 
-\item{user_role}{(character) a user or role name}
+\item{user_role}{(character) a user or role name. default: \code{NULL}.
+if \code{NULL}, all users/roles returned}
 
 \item{schema}{(character) a schema}
 }
@@ -23,12 +24,25 @@ Column level privileges
 }
 \examples{
 \dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
-dbExecute(con, "GRANT SELECT
-   (user_name, uid, gid, real_name, home_phone, home_dir, shell)
-   ON passwd TO aliceuser"
- )
-rls_column_privileges(con, "passwd", "aliceuser")
+setup_example_table(con)
+dbExecute(con, "CREATE ROLE sammy")
+columns <- c("user_name", "uid", "gid", "real_name", 
+  "home_phone", "home_dir", "shell")
+rls_tbl(con, "passwd") \%>\%
+  grant(select, cols = columns) \%>\%
+  to(sammy) \%>\%
+  rls_run()
+# Just user sammy
+rls_column_privileges(con, "passwd", "sammy")
+# All users
+rls_column_privileges(con, "passwd")
+
+# cleanup
+dbRemoveTable(con, "passwd")
+dbExecute(con, "DROP ROLE sammy")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }

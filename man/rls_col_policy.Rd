@@ -25,14 +25,20 @@ Column policies
 }
 
 \examples{
-\dontshow{if (has_postgres() && rlang::is_installed("dbplyr")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(DBI)
 library(RPostgres)
 library(dbplyr)
 con <- dbConnect(Postgres())
+setup_example_table(con)
 rls_tbl(con, "passwd") \%>\% rls_col_policy(role = "public", permissions = "view")
 df <- rls_tbl(con, "passwd") \%>\% dplyr::collect()
-dbplyr::lazy_frame(df) \%>\% 
-  rls_col_policy(role = "public", permissions = "view") \%>\% 
+dbplyr::lazy_frame(df) \%>\%
+  rls_col_policy(role = "public", permissions = "view") \%>\%
   attr(., "policies_columns")
+
+# cleanup
+dbRemoveTable(con, "passwd")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
