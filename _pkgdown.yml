@@ -14,8 +14,6 @@ reference:
   - title: Row level security
     contents:
       - rls_check_status
-      - rls_construct_policy
-      - rls_create_policy
       - rls_drop_policy
       - rls_policy_exists
       - rls_disable
@@ -41,6 +39,9 @@ reference:
       - rls_column_privileges
       - rls_privileges
       - rls_table_privileges
+  - title: Check / verify
+    contents:
+      - with_db_user
   - title: Utilities
     contents:
       - has_postgres
