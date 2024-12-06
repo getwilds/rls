@@ -23,35 +23,16 @@ library(dbplyr)
 library(rls)
 ```
 
-## Start PostgreSQL locally
-
-Start Postgres however you do that.
-
-## Create a connection
-
+## Create a connection to a Postgres database
 
 ``` r
-con <- dbConnect(Postgres())
+con <- dbConnect(
+  Postgres(),
+  # fill your credentials for dbname, host, port, and user here
+)
 ```
 
-
-
-## Create roles
-
-
-``` r
-# Administrator
-dbExecute(con, "CREATE ROLE admin")
-# Normal user
-dbExecute(con, "CREATE ROLE bob")
-# Another normal user
-dbExecute(con, "CREATE ROLE alice")
-```
-
-## Create a table
-
-Create the table (with no data)
-
+## Create an example table schema and roles for your database
 
 ``` r
 invisible(dbExecute(con, "
@@ -66,27 +47,29 @@ invisible(dbExecute(con, "
   shell                 text NOT NULL
 );
 "))
+
+# Administrator
+dbExecute(con, "CREATE ROLE admin")
+# Normal user
+dbExecute(con, "CREATE ROLE bob")
+# Another normal user
+dbExecute(con, "CREATE ROLE alice")
 ```
 
-Some sample data
+## Add data to the table
 
 
 ``` r
-sample_data <- tribble(
+example_data <- tribble(
   ~user_name, ~pwhash, ~uid, ~gid, ~real_name, ~home_phone, ~home_dir, ~shell,
   'admin','xxx',0,0,'Admin','111-222-3333','/root','/bin/dash',
   'bob','xxx',1,1,'Bob','123-456-7890','/home/bob','/bin/zsh',
   'alice','xxx',2,1,'Alice','098-765-4321','/home/alice','/bin/zsh'
 )
-```
 
-Append rows to the `passwd` table
-
-
-``` r
 rows_append(
   tbl(con, "passwd"),
-  copy_inline(con, sample_data),
+  copy_inline(con, example_data),
   in_place = TRUE
 )
 ```
@@ -107,7 +90,7 @@ tbl(con, "passwd")
 
 ## Enable row level security
 
-Enable row level security with `rls_enable`
+Enable row level security on the `passwd` table with with `rls_enable`
 
 
 ``` r
@@ -127,6 +110,9 @@ rls_check_status(con, "passwd")
 
 ## Create row level security policies
 
+1. Get the reference to the table
+2. Create a new policy called "admin_all", which will 
+
 `admin_all` = Administrator can see all rows and add any rows
 
 
@@ -136,6 +122,7 @@ policy1 <- rls_tbl(con, "passwd") %>%
   rows_existing(TRUE) %>%
   rows_new(TRUE) %>%
   to(admin)
+
 policy1
 #> <row_policy> admin_all
 #>   user: admin
@@ -148,8 +135,10 @@ policy1
 #> 1     0 /root       111-222-3333 xxx    Admin     /bin/dash     0 admin    
 #> 2     1 /home/bob   123-456-7890 xxx    Bob       /bin/zsh      1 bob      
 #> 3     1 /home/alice 098-765-4321 xxx    Alice     /bin/zsh      2 alice
+
 rls_run(policy1)
 #> [1] 0
+
 rls_policies(con)
 #> # A tibble: 1 × 8
 #>   schemaname tablename policyname permissive roles      cmd   qual  with_check
