@@ -1,6 +1,7 @@
 url: https://getwilds.org/rls
 template:
   bootstrap: 5
+  light-switch: true
 reference:
   - title: rls
     desc: >
