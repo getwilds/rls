@@ -2,7 +2,7 @@
 % Please edit documentation in R/with.R
 \name{with_db_user}
 \alias{with_db_user}
-\title{With database role}
+\title{With database user or role}
 \usage{
 with_db_user(con, user, code)
 }
@@ -16,7 +16,7 @@ the code in \code{code}}
 \item{code}{a code block}
 }
 \description{
-With database role
+With database user or role
 }
 \section{How it works}{
 
