@@ -18,6 +18,10 @@ rls_permissions <- function() {
 #' @export
 #' @param con a postgres or redshift connection object
 #' @return the current user, scalar
+#' @references <https://www.postgresql.org/docs/current/functions-info.html>
+#' <https://docs.aws.amazon.com/redshift/latest/dg/r_CURRENT_USER.html>
+#' @details uses PostgreSQL or Redshift `current_user` system information
+#' function
 #' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)

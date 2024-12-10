@@ -27,6 +27,7 @@ con <- dbConnect(Postgres())
 if (!dbExistsTable(con, "passwd")) {
    setup_example_table(con, "passwd")
 }
+# current_user is a special system function
 rls_tbl(con, "passwd") \%>\%
   row_policy("a_good_policy") \%>\%
   commands(update) \%>\%

@@ -140,7 +140,7 @@ rls_policies(con)
 ```
 
 `user_mod` = Normal users can update their own records, but limit
-which shells a normal user is allowed to set
+which shells a normal user is allowed to set (Note: `current_user` is a special system function that's part of PostgreSQL and Redshift that returns the current user)
 
 ```{r}
 policy3 <- rls_tbl(con, "passwd") %>%

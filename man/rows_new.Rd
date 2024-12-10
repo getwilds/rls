@@ -36,6 +36,7 @@ rls_tbl(con, "passwd") \%>\%
   rows_new(TRUE) \%>\%
   to(jane)
 
+# current_user is a special system function
 rls_tbl(con, "passwd") \%>\%
   row_policy("that_policy") \%>\%
   commands(update) \%>\%

@@ -15,6 +15,10 @@ the current user, scalar
 \description{
 Get the current user
 }
+\details{
+uses PostgreSQL or Redshift \code{current_user} system information
+function
+}
 \examples{
 \dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
@@ -22,4 +26,8 @@ library(RPostgres)
 con <- dbConnect(Postgres())
 rls_current_user(con)
 \dontshow{\}) # examplesIf}
+}
+\references{
+\url{https://www.postgresql.org/docs/current/functions-info.html}
+\url{https://docs.aws.amazon.com/redshift/latest/dg/r_CURRENT_USER.html}
 }
