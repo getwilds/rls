@@ -12,6 +12,7 @@ reference:
     contents:
       - rls_current_user
       - rls_list_roles
+      - rls_role_exists
   - title: Row level security
     contents:
       - rls_check_status

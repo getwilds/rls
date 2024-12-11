@@ -212,6 +212,22 @@ rls_list_roles <- function(con) {
     )
 }
 
+#' Check if a role or user exists
+#'
+#' Excludes user/roles: "postgres" and any starting with "pg_"
+#' @export
+#' @inheritParams rls_column_privileges
+rls_role_exists <- function(con, user_role) {
+  is_conn(con)
+  assert_scalar(user_role)
+  df <- tbl(con, "pg_roles")
+  df <- filter(df,
+    rolname != "postgres",
+    !rolname %like% "pg_%"
+  )
+  user_role %in% pull(df, "rolname")
+}
+
 #' Column policies
 #'
 #' @export
