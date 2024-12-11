@@ -71,9 +71,7 @@ commands <- function(.data, ...) {
 #' @export
 #' @inheritParams grant
 #' @inherit row_policy return
-#' @param using an expression to use to check against existing rows
-#' @param sql (character) sql syntax to use for existing rows
-#' @details Use either `using` or `sql`, not both
+#' @param sql (character) sql syntax to use for existing rows. required
 #' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
@@ -89,17 +87,17 @@ commands <- function(.data, ...) {
 #'
 #' # cleanup
 #' dbDisconnect(con)
-rows_existing <- function(.data, using = NULL, sql = NULL) {
+rows_existing <- function(.data, sql) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
-  using_quo <- enquo(using)
-  stopifnot("Can not using and sql parameters together" =
-    xor(!rlang::quo_is_null(using_quo), !is_empty(sql)))
-  .data <- as_row_policy(.data)
-  if (rlang::is_null(sql)) {
-    .data$existing_rows <- translate_sql(!!using_quo, con = as_con(.data))
-  } else {
-    .data$existing_rows <- sql
+  assert_is(sql, c("character", "logical"))
+  if (rlang::is_logical(sql)) {
+    if (!sql) {
+      cli_abort("if sql is logical, it must be TRUE")
+    }
+    sql <- tolower(sql)
   }
+  .data <- as_row_policy(.data)
+  .data$existing_rows <- sql
   .data
 }
 
@@ -109,16 +107,19 @@ rows_existing <- function(.data, using = NULL, sql = NULL) {
 #' @importFrom dbplyr translate_sql
 #' @inheritParams grant
 #' @inherit row_policy return
-#' @param check an expression to use to check against addition of
-#' new rows or editing of existing rows
-#' @param sql (character) sql syntax to use for new rows
-#' @details Use either `check` or `sql`, not both
+#' @param sql (character/logical) sql syntax to use for new rows. required.
+#' either SQL syntax (e.g., `a = 5` instead of `a == 5`) or TRUE (FALSE
+#' not supported)
 #' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
 #' con <- dbConnect(Postgres())
 #' if (!dbExistsTable(con, "passwd")) {
 #'    setup_example_table(con, "passwd")
+#' }
+#'
+#' if (!rls_role_exists(con, "jane")) {
+#'   dbExecute(con, "CREATE ROLE jane")
 #' }
 #'
 #' rls_tbl(con, "passwd") %>%
@@ -133,22 +134,23 @@ rows_existing <- function(.data, using = NULL, sql = NULL) {
 #'   row_policy("that_policy") %>%
 #'   commands(update) %>%
 #'   rows_existing(sql = 'current_user = "user_name"') %>%
-#'   rows_new(home_phone == "098-765-4321") %>%
+#'   rows_new(sql = 'home_phone = "098-765-4321"') %>%
 #'   to(jane)
 #'
 #' # cleanup
+#' dbExecute(con, "DROP ROLE jane")
 #' dbDisconnect(con)
-rows_new <- function(.data, check = NULL, sql = NULL) {
+rows_new <- function(.data, sql) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
-  check_quo <- enquo(check)
-  stopifnot("Can not check and sql parameters together" =
-    xor(!rlang::quo_is_null(check_quo), !is_empty(sql)))
-  .data <- as_row_policy(.data)
-  if (rlang::is_null(sql)) {
-    .data$new_rows <- translate_sql(!!check_quo, con = as_con(.data))
-  } else {
-    .data$new_rows <- sql
+  assert_is(sql, c("character", "logical"))
+  if (rlang::is_logical(sql)) {
+    if (!sql) {
+      cli_abort("if sql is logical, it must be TRUE")
+    }
+    sql <- tolower(sql)
   }
+  .data <- as_row_policy(.data)
+  .data$new_rows <- sql
   .data
 }
 

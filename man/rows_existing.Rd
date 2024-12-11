@@ -4,14 +4,12 @@
 \alias{rows_existing}
 \title{Create rule for existing rows}
 \usage{
-rows_existing(.data, using = NULL, sql = NULL)
+rows_existing(.data, sql)
 }
 \arguments{
 \item{.data}{an s3 object of class \code{privilege}}
 
-\item{using}{an expression to use to check against existing rows}
-
-\item{sql}{(character) sql syntax to use for existing rows}
+\item{sql}{(character) sql syntax to use for existing rows. required}
 }
 \value{
 an S3 class \code{row_policy}; see \code{\link[=row_policy]{row_policy()}} for its
@@ -19,9 +17,6 @@ structure
 }
 \description{
 Create rule for existing rows
-}
-\details{
-Use either \code{using} or \code{sql}, not both
 }
 \examples{
 \dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

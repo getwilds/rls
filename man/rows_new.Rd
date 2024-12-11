@@ -4,15 +4,14 @@
 \alias{rows_new}
 \title{Create rule for new rows}
 \usage{
-rows_new(.data, check = NULL, sql = NULL)
+rows_new(.data, sql)
 }
 \arguments{
 \item{.data}{an s3 object of class \code{privilege}}
 
-\item{check}{an expression to use to check against addition of
-new rows or editing of existing rows}
-
-\item{sql}{(character) sql syntax to use for new rows}
+\item{sql}{(character/logical) sql syntax to use for new rows. required.
+either SQL syntax (e.g., \code{a = 5} instead of \code{a == 5}) or TRUE (FALSE
+not supported)}
 }
 \value{
 an S3 class \code{row_policy}; see \code{\link[=row_policy]{row_policy()}} for its
@@ -21,9 +20,6 @@ structure
 \description{
 Create rule for new rows
 }
-\details{
-Use either \code{check} or \code{sql}, not both
-}
 \examples{
 \dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(DBI)
@@ -31,6 +27,10 @@ library(RPostgres)
 con <- dbConnect(Postgres())
 if (!dbExistsTable(con, "passwd")) {
    setup_example_table(con, "passwd")
+}
+
+if (!rls_role_exists(con, "jane")) {
+  dbExecute(con, "CREATE ROLE jane")
 }
 
 rls_tbl(con, "passwd") \%>\%
@@ -45,10 +45,11 @@ rls_tbl(con, "passwd") \%>\%
   row_policy("that_policy") \%>\%
   commands(update) \%>\%
   rows_existing(sql = 'current_user = "user_name"') \%>\%
-  rows_new(home_phone == "098-765-4321") \%>\%
+  rows_new(sql = 'home_phone = "098-765-4321"') \%>\%
   to(jane)
 
 # cleanup
+dbExecute(con, "DROP ROLE jane")
 dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
