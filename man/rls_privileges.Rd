@@ -54,7 +54,7 @@ rls_tbl(con, "passwd") \%>\%
   row_policy(name = "stuff") \%>\%
   rows_existing(TRUE) \%>\%
   to(jane) \%>\% 
-  rls_run()
+  rls_perform()
 
 rls_privileges(con, "passwd", "jane")
 

@@ -9,7 +9,7 @@ test_that("rls_drop_policy", {
       row_policy("hide_confidential") %>%
       rows_existing(TRUE)
 
-    rls_run(the_policy)
+    rls_perform(the_policy)
 
     policies_before <- rls_policies(con)
     out <- rls_drop_policy(con, the_policy)

@@ -43,7 +43,7 @@ if (!dbExistsTable(con, "passwd")) {
 }
 rls_tbl(con, "passwd") \%>\%
   row_policy("my_policy") \%>\%
-  rls_run()
+  rls_perform()
 rls_policies(con)
 
 # cleanup

@@ -51,7 +51,7 @@ rls_current_user <- function(con) {
 #' rls_tbl(con, "passwd") %>%
 #'   grant(select, cols = columns) %>%
 #'   to(sammy) %>%
-#'   rls_run()
+#'   rls_perform()
 #' # Just user sammy
 #' rls_column_privileges(con, "passwd", "sammy")
 #' # All users
@@ -172,7 +172,7 @@ table_privileges_query <- function(con, table, schema, user_role, urtable,
 #'   row_policy(name = "stuff") %>%
 #'   rows_existing(TRUE) %>%
 #'   to(jane) %>% 
-#'   rls_run()
+#'   rls_perform()
 #' 
 #' rls_privileges(con, "passwd", "jane")
 #' 

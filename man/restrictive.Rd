@@ -6,6 +6,9 @@
 \usage{
 restrictive(.data)
 }
+\arguments{
+\item{.data}{an s3 object of class \code{privilege}}
+}
 \value{
 an S3 class \code{row_policy}; see \code{\link[=row_policy]{row_policy()}} for its
 structure

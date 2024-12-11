@@ -26,7 +26,7 @@
 #' }
 #' rls_tbl(con, "passwd") %>%
 #'   row_policy("my_policy") %>%
-#'   rls_run()
+#'   rls_perform()
 #' rls_policies(con)
 #'
 #' # cleanup
@@ -166,6 +166,7 @@ express <- function(x) {
 #' Set RLS policy to be restrictive
 #'
 #' @export
+#' @inheritParams grant
 #' @inherit row_policy return
 #' @details By default row level policies are permissive. Permissive policies
 #' are applied using a boolean "OR", so you need permission from only one

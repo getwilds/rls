@@ -1,4 +1,4 @@
-#' Run a query
+#' Perform a query
 #'
 #' @export
 #' @param query an s3 object of class `privilege` or `row_policy, required.
@@ -7,7 +7,7 @@
 #' @param con DBI connection object, optional, see `query`
 #' @return error from PostgreSQL or Redshift upon error, or an integer
 #' value
-rls_run <- function(query, con = NULL) {
+rls_perform <- function(query, con = NULL) {
   assert_is(query, c("privilege", "row_policy"))
   con <- as_con(query %||% con)
   is_conn(con)

@@ -75,7 +75,7 @@ pipe_autoexec <- function(toggle) {
   if (isTRUE(info[["is_piped"]])) {
     rls_exit <- function(x) {
       if (inherits(x, c("privilege", "row_policy"))) {
-        rls_run(x, x$data$src$con)
+        rls_perform(x, x$data$src$con)
       } else {
         x
       }

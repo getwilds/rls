@@ -15,7 +15,7 @@ test_that("rls_policies", {
       commands(select) %>%
       rows_existing(TRUE)
 
-    rls_run(my_policy)
+    rls_perform(my_policy)
 
     policies <- rls_policies(con)
 

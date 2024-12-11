@@ -34,7 +34,7 @@ rls_tbl(con, "attitude") \%>\%
   row_policy("all_view") \%>\%
   commands(select) \%>\%
   rows_existing(TRUE) \%>\%
-  rls_run()
+  rls_perform()
 rls_policies(con)
 rls_drop_policies(con)
 dbRemoveTable(con, "attitude")

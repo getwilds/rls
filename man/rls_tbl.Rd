@@ -31,7 +31,7 @@ dbExecute(con, "CREATE ROLE ally")
 rls_tbl(con, "passwd") \%>\%
   grant(select) \%>\%
   to(ally) \%>\%
-  rls_run()
+  rls_perform()
 dbExecute(con, "SET SESSION AUTHORIZATION ally")
 rls_tbl(con, "passwd")
 dbExecute(con, glue::glue("SET SESSION AUTHORIZATION {user}"))

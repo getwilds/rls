@@ -45,13 +45,13 @@ dbWriteTable(con, "atable", mtcars, overwrite = TRUE)
 policy1 <- rls_tbl(con, "atable") \%>\%
   row_policy("hide_confidential") \%>\%
   rows_existing(TRUE)
-rls_run(policy1)
+rls_perform(policy1)
 
 rls_policies(con)
 rls_drop_policy(con, policy1)
 rls_policies(con)
 
-rls_run(policy1)
+rls_perform(policy1)
 rls_policies(con)
 rls_drop_policies(con)
 rls_policies(con)

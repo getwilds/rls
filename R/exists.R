@@ -18,7 +18,7 @@
 #'   rows_existing(TRUE) %>%
 #'   to(jane)
 #' policy
-#' rls_run(policy)
+#' rls_perform(policy)
 #' rls_policies(con)
 #' rls_policy_exists(con, "some_policy")
 #' rls_drop_policy(con, name = "some_policy", table = "attitude")

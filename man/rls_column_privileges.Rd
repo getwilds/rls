@@ -34,7 +34,7 @@ columns <- c("user_name", "uid", "gid", "real_name",
 rls_tbl(con, "passwd") \%>\%
   grant(select, cols = columns) \%>\%
   to(sammy) \%>\%
-  rls_run()
+  rls_perform()
 # Just user sammy
 rls_column_privileges(con, "passwd", "sammy")
 # All users
