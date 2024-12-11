@@ -11,6 +11,10 @@ commands(.data, ...)
 
 \item{...}{one of all, select, update, insert, delete}
 }
+\value{
+an S3 class \code{row_policy}; see \code{\link[=row_policy]{row_policy()}} for its
+structure
+}
 \description{
 Commands
 }

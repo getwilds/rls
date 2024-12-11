@@ -13,6 +13,10 @@ rows_existing(.data, using = NULL, sql = NULL)
 
 \item{sql}{(character) sql syntax to use for existing rows}
 }
+\value{
+an S3 class \code{row_policy}; see \code{\link[=row_policy]{row_policy()}} for its
+structure
+}
 \description{
 Create rule for existing rows
 }

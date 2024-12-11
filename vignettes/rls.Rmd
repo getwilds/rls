@@ -138,6 +138,7 @@ policy1 <- rls_tbl(con, "passwd") %>%
   to(admin)
 policy1
 #> <row_policy> admin_all
+#>   as: PERMISSIVE
 #>   user: admin
 #>   existing rows: TRUE
 #>   new rows: TRUE
@@ -167,6 +168,7 @@ policy2 <- rls_tbl(con, "passwd") %>%
   rows_existing(TRUE)
 policy2
 #> <row_policy> all_view
+#>   as: PERMISSIVE
 #>   commands: select
 #>   existing rows: TRUE
 #> # Source:   SQL [3 x 8]
@@ -201,6 +203,7 @@ policy3 <- rls_tbl(con, "passwd") %>%
   )
 policy3
 #> <row_policy> user_mod
+#>   as: PERMISSIVE
 #>   commands: update
 #>   existing rows: current_user = user_name
 #>   new rows: 

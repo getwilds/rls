@@ -14,6 +14,10 @@ new rows or editing of existing rows}
 
 \item{sql}{(character) sql syntax to use for new rows}
 }
+\value{
+an S3 class \code{row_policy}; see \code{\link[=row_policy]{row_policy()}} for its
+structure
+}
 \description{
 Create rule for new rows
 }

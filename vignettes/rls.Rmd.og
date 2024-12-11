@@ -38,7 +38,12 @@ con <- dbConnect(Postgres())
 ```
 
 ```{r echo=FALSE}
+# get current user
 user <- dbGetQuery(con, "select current_user")$current_user
+# delete passwd table if it exists
+if (dbExistsTable(con, "passwd")) {
+  dbRemoveTable(con, "passwd")
+}
 ```
 
 ## Create roles
@@ -268,4 +273,3 @@ dbExecute(con, "DROP ROLE admin")
 dbExecute(con, "DROP ROLE bob")
 dbExecute(con, "DROP ROLE alice")
 ```
-

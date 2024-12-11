@@ -11,6 +11,9 @@ translate_row_policy(policy, con)
 
 \item{con}{DBI connection object, required}
 }
+\value{
+an S3 class \code{\link[dbplyr:sql]{dbplyr::sql()}}
+}
 \description{
 Translate row policy
 }
@@ -28,7 +31,9 @@ if (rls_policy_exists(con, "blue_policy")) {
   rls_drop_policy(con, name = "blue_policy", table = "passwd")
 }
 
-policy <- rls_tbl(con, "passwd") \%>\%
+policy <-
+rls_tbl(con, "passwd") \%>\%
+  restrictive() \%>\%
   row_policy(name = "blue_policy") \%>\%
   commands(update) \%>\%
   rows_existing(TRUE) \%>\%

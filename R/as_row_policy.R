@@ -14,6 +14,7 @@ as_row_policy.tbl_sql <- function(x) {
   tmp <- list(
     data = x,
     name = NULL,
+    as = NULL,
     commands = NULL,
     user = NULL,
     existing_rows = NULL,
@@ -25,6 +26,7 @@ as_row_policy.tbl_sql <- function(x) {
 #' @export
 print.row_policy <- function(x, ...) {
   cat_line(glue("<row_policy> {x$name}"))
+  cat_me("as", x$as %||% "PERMISSIVE")
   if (!is_really_empty(x$user)) {
     cat_me("user", x$user)
   }

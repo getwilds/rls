@@ -11,8 +11,27 @@ row_policy(.data, name)
 
 \item{name}{(character) scalar name for the policy. required}
 }
+\value{
+an S3 class \code{row_policy}; see \code{\link[=row_policy]{row_policy()}} for its
+structure
+}
 \description{
 Row policy
+}
+\details{
+The return object and all functions that build on this
+function return an S3 class called \code{row_policy} which is just
+a named list with slots:
+\itemize{
+\item data
+\item name
+\item as
+\item commands
+\item user
+\item existing_rows
+\item new_rows
+\item type
+}
 }
 \examples{
 \dontshow{if (has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

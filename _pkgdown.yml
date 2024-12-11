@@ -25,6 +25,7 @@ reference:
       - row_policy
       - rows_existing
       - rows_new
+      - restrictive
   - title: Privileges (aka column level security)
     contents:
       - as_priv
