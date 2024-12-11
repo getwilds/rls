@@ -33,9 +33,9 @@ reference:
       - grant
       - to
       - from
-  - title: Run column or row security queries
+  - title: Perform column or row security queries
     contents:
-      - rls_run
+      - rls_perform
   - title: Fetch privileges and row level security policies
     contents:
       - rls_column_privileges
