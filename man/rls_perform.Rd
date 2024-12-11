@@ -12,8 +12,8 @@ rls_perform(query, con = NULL)
 \item{con}{DBI connection object, optional, see \code{query}}
 }
 \value{
-error from PostgreSQL or Redshift upon error, or an integer
-value
+error from PostgreSQL or Redshift upon error; upon success a single
+row tibble with column "rows_affected" (integer)
 }
 \description{
 Perform a query
