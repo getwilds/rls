@@ -35,6 +35,16 @@ This package follows [Git Flow](https://nvie.com/posts/a-successful-git-branchin
 
 Please note that the rls project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
 
+## Roadmap
+
+For the next release:
+
+- Incorporate big set of changes on `priv` branch ([#13](https://github.com/getwilds/rls/issues/13) - related [#4](https://github.com/getwilds/rls/issues/4))
+- Make sure package works with Redshift ([#14](https://github.com/getwilds/rls/issues/14))
+- Change package name to `tablemanners` ([#6](https://github.com/getwilds/rls/issues/6))
+- Make sure instructions for anyone contributing are solid wrt connecting to postgres ([#16](https://github.com/getwilds/rls/issues/16))
+- Get feedback from users before the release! (likely to lead to changes)
+
 ## License
 
 [MIT](LICENSE.md)
