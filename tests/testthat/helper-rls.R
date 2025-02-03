@@ -3,7 +3,7 @@ postgres_default <- function(...) {
     # replaces RPostgres:::connect_default
     DBI::dbConnect(RPostgres::Postgres(), ...)
   }, error = function(...) {
-    vars <- "try setting env vars: PGHOST, PGPORT, PGUSER, PGDATABASE"
+    vars <- "try setting env vars: PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE"
     testthat::skip(glue("Test database not available. {vars}"))
   })
 }
