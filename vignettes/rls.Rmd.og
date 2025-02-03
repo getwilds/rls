@@ -128,7 +128,7 @@ policy1 <- rls_tbl(con, "passwd") %>%
   rows_new(TRUE) %>%
   to(admin)
 policy1
-rls_run(policy1)
+rls_perform(policy1)
 rls_policies(con)
 ```
 
@@ -140,7 +140,7 @@ policy2 <- rls_tbl(con, "passwd") %>%
   commands(select) %>%
   rows_existing(TRUE)
 policy2
-rls_run(policy2)
+rls_perform(policy2)
 rls_policies(con)
 ```
 
@@ -157,7 +157,7 @@ policy3 <- rls_tbl(con, "passwd") %>%
     shell IN (\'/bin/bash\',\'/bin/sh\',\'/bin/zsh\')'
   )
 policy3
-rls_run(policy3)
+rls_perform(policy3)
 rls_policies(con)
 ```
 
@@ -169,7 +169,7 @@ Allow admin all normal rights
 rls_tbl(con, "passwd") %>%
   grant(select, insert, update, delete) %>%
   to(admin) %>%
-  rls_run()
+  rls_perform()
 ```
 
 Users only get select access on public columns
@@ -183,7 +183,7 @@ rls_tbl(con, "passwd") %>%
     )
   ) %>%
   to(public) %>%
-  rls_run()
+  rls_perform()
 ```
 
 Allow users to update certain columns
@@ -194,7 +194,7 @@ rls_tbl(con, "passwd") %>%
     cols = c("pwhash", "real_name", "home_phone", "shell")
   ) %>%
   to(public) %>%
-  rls_run()
+  rls_perform()
 ```
 
 ## Ensure the system behaves as expected
