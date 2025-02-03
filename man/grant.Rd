@@ -25,6 +25,12 @@ if (!dbExistsTable(con, "passwd")) {
    setup_example_table(con, "passwd")
 }
 
+if (!rls_role_exists(con, "jane")) {
+  dbExecute(con, "CREATE ROLE jane")
+}
+
+# NOTE: privileges construction doesn't make a change in the database
+# unless you pass it to `rls_perform` or set `auto_pipe(TRUE)`
 rls_tbl(con, "passwd") \%>\%
   grant(update) \%>\%
   to(jane)
@@ -37,7 +43,16 @@ rls_tbl(con, "passwd") \%>\%
   grant(update, select, cols = c("real_name", "home_phone")) \%>\%
   to(jane)
 
+# Execute a privilege and inspect the change to jane's details in the DB
+rls_tbl(con, "passwd") \%>\%
+  grant(update, delete) \%>\%
+  to(jane) \%>\% 
+  rls_perform()
+rls_column_privileges(con, "passwd", "jane")
+
 # cleanup
+dbExecute(con, "DROP OWNED BY jane")
+dbExecute(con, "DROP ROLE jane")
 dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
