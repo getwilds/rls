@@ -16,6 +16,14 @@ if \code{NULL}, all users/roles returned}
 
 \item{schema}{(character) a schema}
 }
+\value{
+list of length 3:
+\itemize{
+\item table (tbl): table level privileges
+\item column (tbl): column level privileges
+\item row (tbl): row level policies
+}
+}
 \description{
 Overview of privileges and policies
 }

@@ -10,7 +10,7 @@ rls_current_user(con)
 \item{con}{a postgres or redshift connection object}
 }
 \value{
-the current user, scalar
+the current user, scalar character
 }
 \description{
 Get the current user

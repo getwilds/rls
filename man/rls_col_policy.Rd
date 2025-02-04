@@ -13,6 +13,9 @@ rls_col_policy(.data, role = NULL, permissions = NULL)
 
 \item{permissions}{(character) one of "view" or "edit", see details}
 }
+\value{
+xxx
+}
 \description{
 Column policies
 }

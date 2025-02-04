@@ -10,7 +10,7 @@ rls_list_roles(con)
 \item{con}{a postgres or redshift connection object}
 }
 \value{
-a \code{tbl}
+a \code{tbl}, with a row for each role
 }
 \description{
 List roles

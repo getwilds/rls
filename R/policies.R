@@ -17,7 +17,7 @@ rls_permissions <- function() {
 #'
 #' @export
 #' @param con a postgres or redshift connection object
-#' @return the current user, scalar
+#' @return the current user, scalar character
 #' @references <https://www.postgresql.org/docs/current/functions-info.html>
 #' <https://docs.aws.amazon.com/redshift/latest/dg/r_CURRENT_USER.html>
 #' @details uses PostgreSQL or Redshift `current_user` system information
@@ -145,6 +145,10 @@ table_privileges_query <- function(con, table, schema, user_role, urtable,
 #'
 #' @export
 #' @inheritParams rls_column_privileges
+#' @return list of length 3:
+#' - table (tbl): table level privileges
+#' - column (tbl): column level privileges
+#' - row (tbl): row level policies
 #' @details *Privileges* are broken down into two categories:
 #' - **Table**: Some privileges can only be thought about at the table level,
 #' e.g., truncate can only be applied to an entire table, not a column
@@ -195,7 +199,7 @@ rls_privileges <- function(con, table, user_role = NULL, schema = "public") {
 #' @param con a postgres or redshift connection object
 #' @autoglobal
 #' @global %like%
-#' @return a `tbl`
+#' @return a `tbl`, with a row for each role
 #' @examplesIf has_postgres()
 #' library(DBI)
 #' library(RPostgres)
@@ -234,6 +238,7 @@ rls_role_exists <- function(con, user_role) {
 #' @param .data lazy_frame or data.frame or tbl, etc.
 #' @param role (character) the role name
 #' @param permissions (character) one of "view" or "edit", see details
+#' @return xxx
 #' @section Permissions:
 #' - view: select
 #' - edit: update, insert, delete
