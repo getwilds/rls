@@ -8,7 +8,10 @@ auto_pipe(x = FALSE)
 }
 \arguments{
 \item{x}{(logical) turn on auto excecution of SQL commands (\code{TRUE}),
-or turn off (\code{FALSE})}
+or turn off (\code{FALSE}; default)}
+}
+\value{
+\code{NULL}
 }
 \description{
 Turn on or off auto execution of sql commands

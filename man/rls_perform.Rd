@@ -7,14 +7,26 @@
 rls_perform(query, con = NULL)
 }
 \arguments{
-\item{query}{an s3 object of class \code{privilege} or \verb{row_policy, required. if }con\verb{is not supplied, we attempt to get the connection from}query\verb{; if it is not found we try to use a value passed to }con`.}
+\item{query}{an s3 object of class \code{privilege} or \code{row_policy}, required.
+if \code{con} is not supplied, we attempt to get the connection
+from \code{query}; if it is not found we try to use a value passed to \code{con}.}
 
 \item{con}{DBI connection object, optional, see \code{query}}
 }
 \value{
-error from PostgreSQL or Redshift upon error; upon success a single
+R error upon PostgreSQL or Redshift error; upon success a single
 row tibble with column "rows_affected" (integer)
 }
 \description{
 Perform a query
+}
+\details{
+This function is similar in spirit to that of
+\code{httr2::req_perform()} in that one can construct or privilege or row
+policy object just as you build up an \code{httr2} request, but the request
+is not run until you use the perform function. However, as an alternative,
+\code{rls} has an option to make the end of a pipe chain execute the query -
+see \code{\link[=auto_pipe]{auto_pipe()}}.
+
+See examples throughout other functions for examples of usage.
 }

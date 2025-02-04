@@ -2,10 +2,10 @@
 #'
 #' @export
 #' @inheritParams rls_enable
-#' @return tibble with columns:
-#' - relname
-#' - relrowsecurity
-#' - relforcerowsecurity
+#' @return tibble with a single row, with columns:
+#' - relname (character)
+#' - relrowsecurity (logical)
+#' - relforcerowsecurity (logical)
 rls_check_status <- function(con, table) {
   query <- glue_safe("select relname, relrowsecurity, relforcerowsecurity
 		from pg_class

@@ -13,7 +13,7 @@ reference:
       - rls_current_user
       - rls_list_roles
       - rls_role_exists
-  - title: Row level security
+  - title: Row level security policies
     contents:
       - rls_check_status
       - rls_drop_policy

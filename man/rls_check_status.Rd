@@ -13,11 +13,11 @@ postgres and redshift connections}
 \item{table}{(character) a table name. required}
 }
 \value{
-tibble with columns:
+tibble with a single row, with columns:
 \itemize{
-\item relname
-\item relrowsecurity
-\item relforcerowsecurity
+\item relname (character)
+\item relrowsecurity (logical)
+\item relforcerowsecurity (logical)
 }
 }
 \description{

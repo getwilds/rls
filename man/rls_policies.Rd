@@ -11,7 +11,7 @@ rls_policies(con)
 postgres and redshift connections}
 }
 \value{
-tibble with RLS policies
+\code{tbl} with RLS policies
 }
 \description{
 List row level security policies

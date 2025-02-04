@@ -32,5 +32,5 @@ if (!dbExistsTable(con, "passwd")) {
 }
 
 rls_tbl(con, "passwd") \%>\% row_policy("their_policy")
-rls_tbl(con, "passwd") \%>\% row_policy("their_policy") \%>\% restrictive()
+rls_tbl(con, "passwd") \%>\% row_policy("their_policy") \%>\% restrictive() \%>\% unclass()
 }

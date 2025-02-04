@@ -3,7 +3,7 @@
 #' @export
 #' @param con a DBI database connection object. required. supports only
 #' postgres and redshift connections
-#' @return tibble with RLS policies
+#' @return `tbl` with RLS policies
 #' @details Only difference between postgres and redshift is they use
 #' different table names for RLS policies:
 #' - Postgres: pg_policies

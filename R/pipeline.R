@@ -16,8 +16,8 @@ NULL
 #'
 #' @export
 #' @param x (logical) turn on auto excecution of SQL commands (`TRUE`),
-#' or turn off (`FALSE`)
-#' @return NULL
+#' or turn off (`FALSE`; default)
+#' @return `NULL`
 auto_pipe <- function(x = FALSE) {
   assert_is(x, "logical")
   assert_len(x, 1)

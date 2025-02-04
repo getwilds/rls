@@ -20,16 +20,16 @@ Row policy
 }
 \details{
 The return object and all functions that build on this
-function return an S3 class called \code{row_policy} which is just
+function return an S3 class called \code{row_policy} which is
 a named list with slots:
 \itemize{
-\item data
-\item name
-\item as
-\item commands
-\item user
-\item existing_rows
-\item new_rows
+\item data (tbl)
+\item name (character)
+\item as (character)
+\item commands (character)
+\item user (character)
+\item existing_rows (character)
+\item new_rows (character)
 \item type
 }
 }

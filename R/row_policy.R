@@ -6,16 +6,16 @@
 #' @return an S3 class `row_policy`; see [row_policy()] for its
 #' structure
 #' @details The return object and all functions that build on this
-#' function return an S3 class called `row_policy` which is just
+#' function return an S3 class called `row_policy` which is
 #' a named list with slots:
 #'
-#' - data
-#' - name
-#' - as
-#' - commands
-#' - user
-#' - existing_rows
-#' - new_rows
+#' - data (tbl)
+#' - name (character)
+#' - as (character)
+#' - commands (character)
+#' - user (character)
+#' - existing_rows (character)
+#' - new_rows (character)
 #' - type
 #' @examplesIf has_postgres()
 #' library(DBI)
@@ -184,7 +184,7 @@ express <- function(x) {
 #' }
 #'
 #' rls_tbl(con, "passwd") %>% row_policy("their_policy")
-#' rls_tbl(con, "passwd") %>% row_policy("their_policy") %>% restrictive()
+#' rls_tbl(con, "passwd") %>% row_policy("their_policy") %>% restrictive() %>% unclass()
 restrictive <- function(.data) {
   pipe_autoexec(toggle = rls_env$auto_pipe)
   .data <- as_row_policy(.data)
