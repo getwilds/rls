@@ -38,7 +38,8 @@ library(DBI)
 library(RPostgres)
 con <- dbConnect(Postgres())
 
-rls_current_user(con)
+current1 <- rls_current_user(con)
+current1
 
 dbCreateTable(con, "cars", mtcars)
 rows_append(
@@ -48,11 +49,20 @@ rows_append(
 )
 
 dbExecute(con, "CREATE ROLE analysts")
+dbExecute(con, "GRANT SELECT ON TABLE cars TO analysts")
 
 with_db_user(
  con = con,
  user = "analysts",
  code = dbGetQuery(con, "select * from cars")
 )
+# current user should be the same as above
+current2 <- rls_current_user(con)
+identical(current1, current2)
+
+# cleanup
+dbRemoveTable(con, "cars")
+dbExecute(con, "DROP ROLE analysts")
+dbDisconnect(con)
 \dontshow{\}) # examplesIf}
 }
