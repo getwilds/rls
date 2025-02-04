@@ -3,7 +3,7 @@
 \name{to}
 \alias{to}
 \alias{from}
-\title{To a role or user}
+\title{Grant or revoke TO or FROM a role or user}
 \usage{
 to(.data, ...)
 
@@ -14,8 +14,16 @@ from(.data, ...)
 
 \item{...}{(character) one or more user (or role) names}
 }
+\value{
+an object of S3 class "privilege"
+}
 \description{
-To a role or user
+Grant or revoke TO or FROM a role or user
+}
+\details{
+\code{to()} and \code{from()} are the same exact code underneath; the former
+exists as it sounds better with \code{grant()} while the latter makes more sense
+with \code{revoke()}; but, you can use them interchangably
 }
 \examples{
 \dontshow{if (interactive() && has_postgres()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -27,7 +35,7 @@ if (!dbExistsTable(con, "passwd")) {
 }
 
 rls_tbl(con, "passwd") \%>\% grant(select) \%>\% to(jane)
-rls_tbl(con, "passwd") \%>\% grant(select) \%>\% from(jane)
+rls_tbl(con, "passwd") \%>\% revoke(select) \%>\% from(jane)
 rls_tbl(con, "passwd") \%>\% grant(select) \%>\% to(jane, bob, alice)
 
 # Errors: doesn't make sense to pass rls_tbl output directly to to/from

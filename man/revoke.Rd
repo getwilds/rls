@@ -13,6 +13,9 @@ revoke(.data, ..., cols = NULL)
 
 \item{cols}{(character) vector of column names}
 }
+\value{
+an object of S3 class "privilege"
+}
 \description{
 Revoke
 }

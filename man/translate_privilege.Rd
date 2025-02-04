@@ -11,6 +11,9 @@ translate_privilege(priv, con)
 
 \item{con}{DBI connection object, required}
 }
+\value{
+an object of S3 class \code{\link[dplyr:sql]{dplyr::sql()}} (it's character under the hood)
+}
 \description{
 Translate privilege
 }
@@ -61,6 +64,7 @@ priv
 sql <- translate_privilege(priv, con)
 sql
 dbExecute(con, sql)
+rls_column_privileges(con, "fruits", "jane")
 
 # cleanup
 dbRemoveTable(con, "fruits")
