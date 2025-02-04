@@ -8,21 +8,30 @@ Authors@R: c(
   )
 Description: Row level security helpers. Currenlty supports
     PostgreSQL and Redshift flavored PostgreSQL.
-URL: https://github.com/getwilds/rls, http://getwilds.org/rls
+URL: https://github.com/getwilds/rls, https://getwilds.org/rls
 BugReports: https://github.com/getwilds/rls/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd",
+    "roxyglobals::global_roclet"))
 RoxygenNote: 7.3.2
 Imports: 
     DBI,
-    glue,
-    rlang,
+    dplyr,
+    dbplyr,
     RPostgres,
-    tibble
+    tibble,
+    withr,
+    glue,
+    cli,
+    rlang,
+    magrittr
 Suggests: 
     knitr,
     rmarkdown,
+    roxyglobals,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+Config/roxyglobals/filename: globals.R
+Config/roxyglobals/unique: FALSE

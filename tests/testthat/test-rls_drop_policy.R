@@ -1,14 +1,16 @@
 test_that("rls_drop_policy", {
   with_database_connection({
-    DBI::dbWriteTable(con, "usarrests", USArrests, temporary = TRUE)
+    rls_drop_policies(con)
+    DBI::dbWriteTable(con, "usarrests", USArrests,
+      overwrite = TRUE, temporary = TRUE)
     on.exit(DBI::dbRemoveTable(con, "usarrests"), add = TRUE)
 
-    the_policy <- rls_construct_policy(
-      name = "hide_confidential",
-      table = "usarrests",
-      using = "(true)"
-    )
-    rls_create_policy(con, the_policy)
+    the_policy <- rls_tbl(con, "usarrests") %>%
+      row_policy("hide_confidential") %>%
+      rows_existing(TRUE)
+
+    rls_perform(the_policy)
+
     policies_before <- rls_policies(con)
     out <- rls_drop_policy(con, the_policy)
     policies_after <- rls_policies(con)
